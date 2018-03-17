@@ -79,7 +79,7 @@ int main()
 	}
 	t2 = clock();
 	T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
-//	printf("(sin) time + 1 loop:%f\n",T1);
+//	printf("(sin) time x 1 + 1 loop:%f\n",T1);
 //	printf("(a,b)=%f %f\n", a,b);
 
 	/* sin x 2 + 1 loop */
@@ -92,7 +92,7 @@ int main()
 	t2 = clock();
 	T2 = (t2-t1)/(double) CLOCKS_PER_SEC;
 //	printf("(sin) time x 2 + 1 loop:%f\n",T2);
-	printf("(sin) time: %f\n",T2-T1);
+	printf("Real (sin) time: %f\n",T2-T1);
 //	printf("(a,b)=%f %f\n", a,b);
 
 	return 0;
