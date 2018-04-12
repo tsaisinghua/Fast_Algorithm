@@ -1,2 +1,1 @@
-# Fast_Algorithm
-2018_Fast_Algorithm
+# Fast_Algorithm_2018

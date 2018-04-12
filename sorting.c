@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+<<<<<<< HEAD
 #include <omp.h>
 #include <math.h>
 #include <time.h>
@@ -8,6 +9,12 @@
 #define DEBUG2 0
 int quicksort1(int *x, int left, int right);
 int quicksort2(int *x, int left, int right);
+=======
+//#include <omp.h>
+#include <math.h>
+#include <time.h>
+int quicksort(int *x, int left, int right);
+>>>>>>> 71c17c14a34ffd8933ccc927a0d200072cf43cf1
 
 int main()
 {
@@ -15,12 +22,19 @@ int main()
 	int *x, *y, s, p;
 	double T1;
 	int i, j, N;
+<<<<<<< HEAD
 	
 	srand( time(NULL) );
 
 	//for(N=160000;N<=40960000;N*=2)
 	for(N=10;N<=10;N*=2)
 	
+=======
+
+	srand( time(NULL) );
+
+	for(N=10;N<=10;N*=2)
+>>>>>>> 71c17c14a34ffd8933ccc927a0d200072cf43cf1
 	{
 		x = (int *) malloc( N * sizeof(int) );
 		y = (int *) malloc( N * sizeof(int) );
@@ -30,30 +44,46 @@ int main()
 			//#pragma omp parallel for
 			for(i=0;i<N;++i)
 			{
+<<<<<<< HEAD
 				//y[i] = x[i] = rand() % N;
 				y[i] = x[i] = rand() % (N*N);
 			}
 		}
 		#if DEBUG        // if DEBUG == 1, then compile the following codes 
+=======
+				y[i] = x[i] = rand() % N;
+			}
+		}
+
+>>>>>>> 71c17c14a34ffd8933ccc927a0d200072cf43cf1
 		for(i=0;i<N;++i)
 		{
 			printf("x[%d]=%d\n",i,x[i]);
 		}
+<<<<<<< HEAD
 		#endif			// end of if block
 		#if DEBUG
 		//氣泡排序法：倆倆檢查一下
+=======
+		
+>>>>>>> 71c17c14a34ffd8933ccc927a0d200072cf43cf1
 		t1 = clock();
 		for(i=0;i<N;++i) 
 		{
 			for(j=i+1;j<N;++j)
 			{
+<<<<<<< HEAD
 				if(y[i]<y[j]) 	// y[i]為要檢查的元素，i目前比j小，但若y[i]<y[j],則將兩者互換位置...i.e.大的擺前面，小的擺後面。 
+=======
+				if(y[i]<y[j]) 
+>>>>>>> 71c17c14a34ffd8933ccc927a0d200072cf43cf1
 				{
 					s = y[i];
 					y[i] = y[j];
 					y[j] = s;
 				}
 			}
+<<<<<<< HEAD
 		//排列後，y[i]就會是第 i 大的數 
 		}
 		printf("interation: %d\n", i);
@@ -93,18 +123,37 @@ int main()
 		t1 = clock();
 		quicksort2(y,0,N);
 		#if DEBUG
+=======
+		}
+		
+		t2 = clock();
+		T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
+		printf("Sorting %d elements: %f\n",N, T1);
+		for(i=0;i<N;++i)
+		{
+			//printf("y[%d]=%f\n",i,y[i]);
+		}
+		
+		for(i=0;i<N;++i) y[i] = x[i];
+		
+		quicksort(y,0,N);
+>>>>>>> 71c17c14a34ffd8933ccc927a0d200072cf43cf1
 		for(i=0;i<N;++i)
 		{
 			printf("y[%d]=%d\n",i,y[i]);
 		}
+<<<<<<< HEAD
 		#endif
 		t2 = clock();
 		T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
 		printf("(2)Quick Sorting %d elements: %f\n",N, T1);
+=======
+>>>>>>> 71c17c14a34ffd8933ccc927a0d200072cf43cf1
 		
 		free(x);
 		free(y);
 	} 
+<<<<<<< HEAD
 	return 0;
 }
 
@@ -169,6 +218,13 @@ int quicksort1(int *x, int left, int right)
 
 
 int quicksort2(int *x, int left, int right)
+=======
+
+	return 0;
+}
+
+int quicksort(int *x, int left, int right)
+>>>>>>> 71c17c14a34ffd8933ccc927a0d200072cf43cf1
 {
 	int i, j, k;
 	int pivot, t;
@@ -176,6 +232,7 @@ int quicksort2(int *x, int left, int right)
 	if(left < right-1)
 	{
 		pivot = x[left];
+<<<<<<< HEAD
     	i = left+1;
     	j = right-1;
     	while(1)
@@ -195,10 +252,21 @@ int quicksort2(int *x, int left, int right)
       		#if DEBUG2
 			printf("%d %d %d\n", i,j,pivot);
 			#endif
+=======
+    	i = left;
+    	j = right;
+    	// 56970341
+    	while(1)
+		{
+      		while(i < right && pivot >= x[i]) i++; 
+      		while(j > left && pivot <= x[j]) j--; 
+      		//printf("%d %d %d\n", i,j,pivot);
+>>>>>>> 71c17c14a34ffd8933ccc927a0d200072cf43cf1
       		if(i>=j) break;
       		t = x[i];
       		x[i] = x[j];
       		x[j] = t;
+<<<<<<< HEAD
       		#if DEBUG2
 			for(k=left;k<right;++k)
 			{
@@ -220,11 +288,35 @@ int quicksort2(int *x, int left, int right)
         #endif
 		quicksort2(x, left, j);
 		quicksort2(x, j+1, right);
+=======
+			//for(k=left;k<right;++k)
+			{
+				//printf("x[%d]=%d\n",k,x[k]);
+			}
+			//system("pause");
+        }
+        t = x[left];
+        x[left] = x[j];
+        x[j] = t;
+        //printf("%d\n",j);
+		for(k=left;k<right;++k)
+		{
+			//printf("x[%d]=%d\n",k,x[k]);
+		}
+		//system("pause");
+        
+		quicksort(x, left, j);
+		quicksort(x, j+1, right);
+>>>>>>> 71c17c14a34ffd8933ccc927a0d200072cf43cf1
     }
     else 
     {
     	return 1;
 	}
+<<<<<<< HEAD
 	
 }
 
+=======
+}
+>>>>>>> 71c17c14a34ffd8933ccc927a0d200072cf43cf1
