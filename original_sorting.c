@@ -4,7 +4,8 @@
 #include <math.h>
 #include <time.h>
 //#include "myfun.h" 
-#define DEBUG 1
+#define DEBUG 0 
+#define DEBUG2 0 
 //input a vector x (pointer), 排序的左右邊界(Left, right) 【先給你看函數的樣子是什麼，實作在後面】 
 int quicksort1(int *x, int left, int right);
 int quicksort2(int *x, int left, int right);
@@ -13,12 +14,12 @@ int main()
 {
 	clock_t t1, t2;				// variables for computing clocks 
 	int *x, *y, s, p;
-	double T1;
+	double T1, T2;
 	int i, j, N;
 
 	srand( time(NULL) );
 
-	for(N=10;N<=10;N*=2)
+	for(N=1000;N<=1000;N*=2)
 	{
 		x = (int *) malloc( N * sizeof(int) );
 		y = (int *) malloc( N * sizeof(int) );
@@ -61,10 +62,8 @@ int main()
 				printf("y[%d]=%d\n",j,y[j]);
 			}
 			system("pause");
-			*/
-			
+			*/			
 		}
-		
 		t2 = clock();
 		T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
 		printf("Sorting %d elements: %f\n",N, T1);
@@ -108,10 +107,9 @@ int main()
 		free(x);
 		free(y);
 	} 
-
 	return 0;
 }
-
+//============================================================================== 
 int quicksort1(int *x, int left, int right)
 {
 	int i, j, k, pivot, pivot_loc, N = right-left; 
@@ -132,10 +130,10 @@ int quicksort1(int *x, int left, int right)
 		x[left] = pivot;
 		i = 0; j = N-1;
 		// x: 5(pivot) 4 4 3 2 7 8 9 10 -> y: 4 4 3 2 (i=j=4) 10 9 8 7
-		// x: 4(pivot) 4 4 3 2 7 8 9 10 -> "<"   y: 3 2 (i=j=2) 10 9 8 7 4 4 (x[left+k] < pivot)
-		// x: 4(pivot) 4 4 3 2 7 8 9 10 -> "<="  y: 4 4 3 2 (i=j=4) 10 9 8 7 (x[left+k] <= pivot)
+		// x: 4(pivot) 4 4 3 2 7 8 9 10 -> "<"   y: 3 2 (i=j=2) 10 9 8 7 4 4 
+		// x: 4(pivot) 4 4 3 2 7 8 9 10 -> "<="  y: 4 4 3 2 (i=j=4) 10 9 8 7
 		// x: 5 4 4 3 2 7 8 9 10 , pivot_loc = 5, pivot = 7 
-		// x: 7 4 4 3 2 5 8 9 10 -> y: 
+		// x: 7 4 4 3 2 5 8 9 10 -> y: 與前面講的步驟一致，下去找 y 
 		 
 		for(k=1;k<N;++k) 
 		{
@@ -173,7 +171,7 @@ int quicksort1(int *x, int left, int right)
 	}
 }
 
-
+//============================================================================== 
 int quicksort2(int *x, int left, int right)
 {
 	int i, j, k;
@@ -208,7 +206,7 @@ int quicksort2(int *x, int left, int right)
       		#if DEBUG2
 			for(k=left;k<right;++k)
 			{
-				//printf("x[%d]=%d\n",k,x[k]);
+				printf("x[%d]=%d\n",k,x[k]);
 			}
 			system("pause");
 			#endif
@@ -220,7 +218,7 @@ int quicksort2(int *x, int left, int right)
         printf("i=%d,j=%d\n",i,j);
 		for(k=left;k<right;++k)
 		{
-			//printf("x[%d]=%d\n",k,x[k]);
+			printf("x[%d]=%d\n",k,x[k]);
 		}
 		system("pause");
         #endif
