@@ -3,8 +3,8 @@
 #include <omp.h>
 #include <math.h>
 #include <time.h>
-#include "myfun.h" 
-//#define DEBUG 0
+//#include "myfun.h" 
+#define DEBUG 1
 //input a vector x (pointer), 逼オ娩(Left, right) 倒ㄧ计妓琌ぐ或龟 
 int quicksort1(int *x, int left, int right);
 int quicksort2(int *x, int left, int right);
@@ -18,7 +18,7 @@ int main()
 
 	srand( time(NULL) );
 
-	for(N=10000;N<=10000;N*=2)
+	for(N=10;N<=10;N*=2)
 	{
 		x = (int *) malloc( N * sizeof(int) );
 		y = (int *) malloc( N * sizeof(int) );
@@ -29,15 +29,15 @@ int main()
 			for(i=0;i<N;++i)
 			{
 				y[i] = x[i] = rand() % N;
-				y[i] = x[i] = rand() % (N*N);
+				//y[i] = x[i] = rand() % (N*N);
 			}
 		}
-//		#if DEBUG
+		#if DEBUG					// id DEBUG == 1, then compile the following codes
 		for(i=0;i<N;++i)			// y[i]璶浪琩じiヘ玡ゑj璝y[i]<y[j],玥盢ㄢが传竚...i.e.耚玡耚 
 		{
-			//printf("x[%d]=%d\n",i,x[i]);
+			printf("x[%d]=%d\n",i,x[i]);
 		}
-//		#endif
+		#endif
 		
 		//獁逼猭浪琩,  Operation counts: SWAP, COMPARE (N-1)+(N-2)+(N-3)+...+1
 		t1 = clock();	//O(N^2) Operations.
@@ -80,12 +80,12 @@ int main()
 		
 		t1 = clock();
 		quicksort1(y,0,N);
-//		#if DEBUG
+		#if DEBUG
 		for(i=0;i<N;++i)
 		{
-			//printf("y[%d]=%d\n",i,y[i]);
+			printf("y[%d]=%d\n",i,y[i]);
 		}
-//		#endif
+		#endif
 		t2 = clock();
 		T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
 		printf("(1)Quick Sorting %d elements: %f\n",N, T1);
@@ -95,12 +95,12 @@ int main()
 		
 		t1 = clock();
 		quicksort2(y,0,N);
-//		#if DEBUG
+		#if DEBUG
 		for(i=0;i<N;++i)
 		{
-			//printf("y[%d]=%d\n",i,y[i]);
+			printf("y[%d]=%d\n",i,y[i]);
 		}
-//		#endif
+		#endif
 		t2 = clock();
 		T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
 		printf("(2)Quick Sorting %d elements: %f\n",N, T1);
@@ -124,14 +124,16 @@ int quicksort1(int *x, int left, int right)
 		//   quicksort(x, left, pivot_location);
 		//   quicksort(x, pivot_location+1, right); 
 		y = (int *) malloc(N*sizeof(int));
-		pivot_loc = left+(rand() % N);
-		pivot = x[pivot_loc];
-		x[pivot_loc] = x[left];
+		// pivot = x[left];					=> pivot程オ娩计 
+		// i=0; j=N-1;						=> 安﹚﹍ 
+		pivot_loc = left+(rand() % N);		// pivot x 皚い繦诀计 
+		pivot = x[pivot_loc];				// 盢计砞倒 pivot 
+		x[pivot_loc] = x[left];				// 钡帝盢计籔程オ娩计ユ传竚 ( 簍衡猭А left  pivot ) 
 		x[left] = pivot;
 		i = 0; j = N-1;
 		// x: 5(pivot) 4 4 3 2 7 8 9 10 -> y: 4 4 3 2 (i=j=4) 10 9 8 7
-		// x: 4(pivot) 4 4 3 2 7 8 9 10 -> "<"   y: 3 2 (i=j=2) 10 9 8 7 4 4
-		// x: 4(pivot) 4 4 3 2 7 8 9 10 -> "<="  y: 4 4 3 2 (i=j=4) 10 9 8 7
+		// x: 4(pivot) 4 4 3 2 7 8 9 10 -> "<"   y: 3 2 (i=j=2) 10 9 8 7 4 4 (x[left+k] < pivot)
+		// x: 4(pivot) 4 4 3 2 7 8 9 10 -> "<="  y: 4 4 3 2 (i=j=4) 10 9 8 7 (x[left+k] <= pivot)
 		// x: 5 4 4 3 2 7 8 9 10 , pivot_loc = 5, pivot = 7 
 		// x: 7 4 4 3 2 5 8 9 10 -> y: 
 		 
@@ -145,7 +147,7 @@ int quicksort1(int *x, int left, int right)
 			else
 			{
 				y[j--] = x[left+k];
-				// j = j - 1;
+				// j = j - 1; 
 			}
 		}
 		y[i] = pivot;
@@ -169,6 +171,66 @@ int quicksort1(int *x, int left, int right)
 	{
 		return 1;
 	}
+}
+
+
+int quicksort2(int *x, int left, int right)
+{
+	int i, j, k;
+	int pivot, t;
+	
+	if(left < right-1)
+	{
+		pivot = x[left];
+    	i = left+1;
+    	j = right-1;
+    	while(1)
+		{	
+			// x: 5(pivot) 4 8 3 2 7 3 2 10  -> i = 2, j = 7 (ユ传 x[i], x[j]) 
+			//    5(pivot) 4 2 3 2 7 3 8 10  -> i = 5, j = 6 (ユ传 x[i], x[j])
+			//    5(pivot) 4 2 3 2 3 7 8 10  -> i = 6, j = 5 (ぃユ传!!!) 
+			//    3                5 (location: j) 
+			// x: 4(pivot) 4 8 3 2 7 3 4 10  -> i = 2, j = 7 (ユ传 x[i], x[j]) 
+			//    4(pivot) 4 4 3 2 7 3 8 10  -> i = 5, j = 6 (ユ传 x[i], x[j])
+			//    4(pivot) 4 4 3 2 3 7 8 10  -> i = 6, j = 5 (ぃユ传!!!) 
+			//    3                4 (location: j) 			
+			// x: 8 2 1 8 7 8 9 4 5 8      i = 3, j = 9 (ユ传 x[i], x[j])
+			// x: 8 2 1 8 7 8 9 4 5 8
+      		while(i < right && pivot >= x[i]) i++; // ┕娩т材  pivot <  x[i]  
+      		while(j >  left && pivot <  x[j]) j--; // ┕オ娩т材  pivot >= x[j] 
+      		#if DEBUG2
+			printf("%d %d %d\n", i,j,pivot);
+			#endif
+      		if(i>=j) break;
+      		t = x[i];
+      		x[i] = x[j];
+      		x[j] = t;
+      		#if DEBUG2
+			for(k=left;k<right;++k)
+			{
+				//printf("x[%d]=%d\n",k,x[k]);
+			}
+			system("pause");
+			#endif
+        }
+        //t = x[left];
+        x[left] = x[j];
+        x[j] = pivot;
+        #if DEBUG2
+        printf("i=%d,j=%d\n",i,j);
+		for(k=left;k<right;++k)
+		{
+			//printf("x[%d]=%d\n",k,x[k]);
+		}
+		system("pause");
+        #endif
+		quicksort2(x, left, j);
+		quicksort2(x, j+1, right);
+    }
+    else 
+    {
+    	return 1;
+	}	
 }
 
 
