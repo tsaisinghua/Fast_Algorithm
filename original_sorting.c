@@ -5,7 +5,7 @@
 #include <time.h>
 //#include "myfun.h" 
 #define DEBUG 0 
-#define DEBUG2 0 
+#define DEBUG2 1
 //input a vector x (pointer), 排序的左右邊界(Left, right) 【先給你看函數的樣子是什麼，實作在後面】 
 int quicksort1(int *x, int left, int right);
 int quicksort2(int *x, int left, int right);
@@ -19,7 +19,7 @@ int main()
 
 	srand( time(NULL) );
 
-	for(N=1000;N<=1000;N*=2)
+	for(N=10;N<=10;N*=2)
 	{
 		x = (int *) malloc( N * sizeof(int) );
 		y = (int *) malloc( N * sizeof(int) );
@@ -73,7 +73,7 @@ int main()
 			//printf("y[%d]=%d\n",i,y[i]);
 		}
 		
-		
+		//quicksort 1	
 		//重新指定 y = x
 		for(i=0;i<N;++i) y[i] = x[i];
 		
@@ -89,6 +89,7 @@ int main()
 		T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
 		printf("(1)Quick Sorting %d elements: %f\n",N, T1);
 
+		//quicksort 2
 		//重新指定 y = x,
 		for(i=0;i<N;++i) y[i] = x[i];
 		
@@ -149,7 +150,7 @@ int quicksort1(int *x, int left, int right)
 			}
 		}
 		y[i] = pivot;
-		#if DEBUG2
+		#if DEBUG
 		printf("%d %d %d %d %d\n",left,i,j,pivot,N);
 	 	for(k=0;k<N;++k)
 		{
@@ -182,7 +183,7 @@ int quicksort2(int *x, int left, int right)
 		pivot = x[left];
     	i = left+1;
     	j = right-1;
-    	while(1)
+       	while(1)
 		{	
 			// x: 5(pivot) 4 8 3 2 7 3 2 10  -> i = 2, j = 7 (交換 x[i], x[j]) 
 			//    5(pivot) 4 2 3 2 7 3 8 10  -> i = 5, j = 6 (交換 x[i], x[j])
@@ -197,7 +198,7 @@ int quicksort2(int *x, int left, int right)
       		while(i < right && pivot >= x[i]) i++; // 往右邊找到第一個  pivot <  x[i]  
       		while(j >  left && pivot <  x[j]) j--; // 往左邊找到第一個  pivot >= x[j] 
       		#if DEBUG2
-			printf("%d %d %d\n", i,j,pivot);
+			printf("i=%d j=%d pivot=%d\n", i,j,pivot);
 			#endif
       		if(i>=j) break;
       		t = x[i];
