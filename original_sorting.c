@@ -231,5 +231,3 @@ int quicksort2(int *x, int left, int right)
     	return 1;
 	}	
 }
-
-
