@@ -127,7 +127,7 @@ int median2(int *x, int left, int right)
 		if(pivIndex < midIndex)		
 			left = pivIndex + 1;
 		else if(pivIndex > midIndex)
-			right = pivIndex - 1;			
+			right = pivIndex;			
 		else break;
 	}
 	return x[pivIndex];
