@@ -3,7 +3,7 @@
 #include <omp.h>
 #include <math.h>
 #include <time.h>
-#define DEBUG 1 
+#define DEBUG 0 
 #define DEBUG2 0
 int quicksort2(int *x, int left, int right);
 int median1(int *x, int left, int right);
@@ -18,7 +18,7 @@ int main()
 	int i, j, N, m, mid, odd_mid_pos;
 	srand( time(NULL) );
 
-	for(N=9;N<=9;N*=2)
+	for(N=999999;N<=999999;N*=2)
 	{
 		x = (int *) malloc( N * sizeof(int) );
 		y = (int *) malloc( N * sizeof(int) );
@@ -35,6 +35,13 @@ int main()
 		#endif
 		
 		//median 1
+		#if DEBUG		
+		for(i=0;i<N;++i)
+		{
+			printf("BEFORE:y[%d]=%d\n",i,y[i]);
+		}
+		#endif
+		
 		t1 = clock();
 		median1(y,0,N);
 		t2 = clock();
@@ -44,7 +51,7 @@ int main()
 		#if DEBUG		
 		for(i=0;i<N;++i)
 		{
-			printf("y[%d]=%d\n",i,y[i]);
+			printf("AFTER:y[%d]=%d\n",i,y[i]);
 		}
 		#endif
 		if(N%2==1)
@@ -64,19 +71,33 @@ int main()
 		//重新指定 y = x,
 		for(i=0;i<N;++i) y[i] = x[i];
 		
-		t1 = clock();
-		median2(y,0,N);
+		#if DEBUG
+		for(i=0;i<N;++i)
+		{
+			printf("BEFORE:y[%d]=%d\n",i,y[i]);
+		}
+			#endif
+			
+		t1 = clock();	
+		mid = median2(y,0,N);
 		t2 = clock();
 		T2 = (t2-t1)/(double) CLOCKS_PER_SEC;
 		printf("Quick Median2 of  %d elements: %f\n",N, T2);
-	
-		#if DEBUG		
-		for(i=0;i<N;++i)
+		
+		if (mid < 0)
+			printf("ERROR!\n");
+		
+		else
 		{
-			printf("y[%d]=%d\n",i,y[i]);
+			#if DEBUG
+			for(i=0;i<N;++i)
+			{
+				printf("AFTER:y[%d]=%d\n",i,y[i]);
+			}
+			#endif
+			printf("N=%d is odd, the median2:y[%d]=%d\n",N,((N-1)/2), mid);
+			
 		}
-		#endif
-		printf("median2: y[%d]=%d\n",((N-1)/2), y[(N-1)/2]);
 		free(x);
 		free(y);
 	} 	
@@ -89,45 +110,95 @@ int partition(int *x, int left, int right)
 {
 	int i, j, k;
 	int pivot, t;
+	pivot = x[left];
+    i = left+1;
+    j = right-1;
 	
 	if(left < right-1)
 	{
-		pivot = x[left];
-    	i = left+1;
-    	j = right-1;
-       	while(1)
+		while(1)
 		{	
+			#if DEBUG2
+			printf("BEFORE:i=%d j=%d pivot=%d\n", i,j,pivot);
+			#endif
+			
 			while(i < right && pivot >= x[i]) i++; // 往右邊找到第一個  pivot <  x[i]  
       		while(j >  left && pivot <  x[j]) j--; // 往左邊找到第一個  pivot >= x[j] 
-      		if(i>=j) break;
+      		
+			#if DEBUG2
+			printf("AFTER:i=%d j=%d pivot=%d\n", i,j,pivot);
+			#endif
+				      		
+			if(i>=j) break;
+			
       		t = x[i];
       		x[i] = x[j];
       		x[j] = t;
+      		// x[i] 與 x[j] 互換 
+      		#if DEBUG2
+			for(k=left;k<right;++k)
+			{
+				printf("x[%d]=%d\n",k,x[k]);
+			}
+			system("pause");
+			#endif
       	}
         x[left] = x[j];
         x[j] = pivot;
+        #if DEBUG2
+        printf("i=%d,j=%d\n",i,j);
+		for(k=left;k<right;++k)
+		{
+			printf("x[%d]=%d\n",k,x[k]);
+		}
+		system("pause");
+        #endif
         return j;
     }
-    else 
+    else if(left == right-1)
     {
-    	return 0;
+    	#if DEBUG2
+    	printf("left=%d, right=%d\n", left, right);
+    	#endif
+		return left;		
 	}	
+	else 
+	{
+		return -1;
+	}
 }
+
 //=========================================================================================
+
 int median2(int *x, int left, int right)
 {
-	int j;
 	if(left == right-1) return x[left];
 	int midIndex = (right-left-1)/2;
-	int pivIndex = 0;
+	int pivIndex = -1;
 	while(pivIndex != midIndex)
 	{
 		pivIndex = partition(x, left, right);
-		
-		if(pivIndex < midIndex)		
+		#if DEBUG2
+		printf("pivIndex=%d, midIndex=%d\n", pivIndex, midIndex);
+		#endif
+		if(pivIndex < 0)
+			return pivIndex;
+			
+		if(pivIndex < midIndex)	
+		{
 			left = pivIndex + 1;
+			#if DEBUG2
+			printf("pivIndex < midIndex, left=%d, right=%d\n", left, right);
+			#endif
+		}
+			
 		else if(pivIndex > midIndex)
-			right = pivIndex;			
+		{ 
+			right = pivIndex;
+			#if DEBUG2
+			printf("pivIndex > midIndex, left=%d, right=%d\n", left, right);
+			#endif
+		}
 		else break;
 	}
 	return x[pivIndex];
@@ -148,7 +219,7 @@ int quicksort2(int *x, int left, int right)
 		{	
 			while(i < right && pivot >= x[i]) i++; // 往右邊找到第一個  pivot <  x[i]  
       		while(j >  left && pivot <  x[j]) j--; // 往左邊找到第一個  pivot >= x[j] 
-      		#if DEBUG
+      		#if DEBUG2
 			printf("i=%d j=%d pivot=%d\n", i,j,pivot);
 			#endif
       		if(i>=j) break;

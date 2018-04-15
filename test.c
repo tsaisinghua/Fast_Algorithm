@@ -15,8 +15,8 @@ int main()
 	double T1, T2;
 	int i, j, N, m, mid, odd_mid_pos;
 	srand( time(NULL) );
-	int x[5] = {0,5,3,2,4};
-	for(N=5;N<=5;N*=2)
+	int x[11] = {3,0,2,5,7,9,10,8,6,10,3};
+	for(N=11;N<=11;N*=2)
 	{
 		
 		y = (int *) malloc( N * sizeof(int) );
