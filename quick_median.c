@@ -18,7 +18,7 @@ int main()
 	int i, j, N, m, odd_mid_pos;
 	srand( time(NULL) );
 
-	for(N=17;N<=17;N*=2)
+	for(N=3;N<=3;N*=2)
 	{
 		x = (int *) malloc( N * sizeof(int) );
 		y = (int *) malloc( N * sizeof(int) );
@@ -82,7 +82,6 @@ int main()
 			printf("y[%d]=%d\n",i,y[i]);
 		}
 		#endif
-		odd_mid_pos = 0;
 		if(N%2==1)
 		{
 			odd_mid_pos = (N-1)/2;
@@ -177,7 +176,7 @@ int median1(int *x, int left, int right)
 			while(i < right && pivot >= x[i]) i++; // 往右邊找到第一個  pivot <  x[i]  
       		while(j >  left && pivot <  x[j]) j--; // 往左邊找到第一個  pivot >= x[j] 
       		#if DEBUG2
-			printf("i=%d j=%d pivot=%d\n", i,j,pivot);
+			printf("left=%d, right=%d, i=%d j=%d pivot=%d\n", left, right, i, j, pivot);
 			#endif
       		if(i>=j) break;
       		t = x[i];
@@ -217,68 +216,69 @@ int median1(int *x, int left, int right)
 //=========================================================================================
 int partition(int *x, int left, int right)
 {
-	int i, j, k;
-	int pivot, t; 
-	pivot = x[left];
-	i = left+1;
-	j = right-1;
-	
-	if(left >= right-1)
+	if(left < right-1)
 	{
-		return -1;
-	}	
-	
-	while(left < right-1)
-	{
-			
-	    while(i < right && pivot >= x[i]) i++; // 往右邊找到第一個  pivot <  x[i]  
-	    while(j >  left && pivot <  x[j]) j--; // 往左邊找到第一個  pivot >= x[j] 
-	    #if DEBUG2
-		printf("i=%d j=%d pivot=%d\n", i,j,pivot);
-		#endif
-	    if(i>=j) break;
-   		t = x[i];
-   		x[i] = x[j];
-   		x[j] = t;
-   		#if DEBUG2
+		int i, j, k;
+		int pivot, t;
+		pivot = x[left];
+    	i = left+1;
+    	j = right-1;
+       	while(1)
+		{	
+			while(i < right && pivot >= x[i]) i++; // 往右邊找到第一個  pivot <  x[i]  
+      		while(j >  left && pivot <  x[j]) j--; // 往左邊找到第一個  pivot >= x[j] 
+      		#if DEBUG2
+			printf("i=%d j=%d pivot=%d\n", i,j,pivot);
+			#endif
+      		if(i>=j) break;
+      		t = x[i];
+      		x[i] = x[j];
+      		x[j] = t;
+      		#if DEBUG2
+			for(k=left;k<right;++k)
+			{
+				printf("x[%d]=%d\n",k,x[k]);
+			}
+			system("pause");
+			#endif
+        }
+        //t = x[left];
+        x[left] = x[j];
+        x[j] = pivot;
+        #if DEBUG2
+        printf("i=%d,j=%d\n",i,j);
 		for(k=left;k<right;++k)
 		{
 			printf("x[%d]=%d\n",k,x[k]);
 		}
 		system("pause");
-		#endif
+        #endif
+		return j;
     }
-    x[left] = x[j];
-    x[j] = pivot;
-    #if DEBUG2
-    printf("i=%d,j=%d\n",i,j);
-	for(k=left;k<right;++k)
-	{
-		printf("x[%d]=%d\n",k,x[k]);
-	}
-	system("pause");
-	#endif
-	return j;
+    else 
+    {
+    	return 1;
+	}	
+
 }
 
 //=========================================================================================
 
 int median2(int *x, int left, int right)
 {
-	int i, j, k;
-	int pivot, t;
+	if((right-left-1)==0) return x[left];
 	int midIndex = (right-left-1)/2;
-	int pivIndex = -1;
+	int pivIndex = 0;
 	while(pivIndex != midIndex)
 	{
 		pivIndex = partition(x, left, right);
 		
-		if(pivIndex < midIndex)
+		if(pivIndex < midIndex)		
 			left = pivIndex + 1;
 		else if(pivIndex > midIndex)
-			right = pivIndex - 1;
+			right = pivIndex - 1;			
 		else break;
 	}
-	return x[pivIndex];	
+	return x[pivIndex];
 }
 
