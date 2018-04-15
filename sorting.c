@@ -212,7 +212,6 @@ int quicksort2(int *x, int left, int right)
 			system("pause");
 			#endif
         }
-        //t = x[left];
         x[left] = x[j];
         x[j] = pivot;
         #if DEBUG2
