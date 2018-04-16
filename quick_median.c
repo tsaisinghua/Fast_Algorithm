@@ -76,7 +76,7 @@ int main()
 		{
 			printf("BEFORE:y[%d]=%d\n",i,y[i]);
 		}
-			#endif
+		#endif
 			
 		t1 = clock();	
 		mid = median2(y,0,N);

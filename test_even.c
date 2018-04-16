@@ -3,7 +3,7 @@
 #include <omp.h>
 #include <math.h>
 #include <time.h>
-#define DEBUG 1 
+#define DEBUG 1
 #define DEBUG2 0
 int median2(int *x, int left, int right);
 int median1(int *x, int left, int right);
@@ -16,22 +16,22 @@ int quicksort2(int *x, int left, int right);
 int main()
 {
 	clock_t t1, t2;				// variables for computing clocks 
-	int *y, s;
+	int *x, *y, s;
 	double T1, T2;
-	int i, j, N=8, m, odd_mid_pos;
-	double mid;
-	int x[8]={0,7,5,9,2,10,6,3};
+	int i, j, N, m, odd_mid_pos;
+	int mid;
+	//int x[8]={0,7,5,9,2,10,6,3};
 	srand( time(NULL) );
 
-	//for(N=1000000;N<=1000000;N*=2)
+	for(N=9;N<=9;N*=2)
 	{
-		//x = (int *) malloc( N * sizeof(int) );
+		x = (int *) malloc( N * sizeof(int) );
 		y = (int *) malloc( N * sizeof(int) );
 
 		for(i=0;i<N;++i)
 		{
-			//y[i] = x[i] = rand() % N;
-			y[i] = x[i];
+			y[i] = x[i] = rand() % N;
+			//y[i] = x[i];
 		}
 		#if DEBUG					
 		for(i=0;i<N;++i)			
@@ -82,7 +82,7 @@ int main()
 		{
 			printf("BEFORE:y[%d]=%d\n",i,y[i]);
 		}
-			#endif
+		#endif
 		if (median_odd(y,0,N) < 0 || (median_even1(y,0,N) + median_even2(y,0,N)) < 0)
 		{
 			printf("ERROR!\n");
@@ -93,16 +93,18 @@ int main()
 			{
 				t1 = clock();
 				mid = median_odd(y,0,N);
+				printf("mid:y[%d]=%d\n",((N-1)/2), mid);
 				t2 = clock();
-				T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
-				printf("Odd Terms Quick Median2 of  %d elements: %f\n",N, T1);
+				T2 = (t2-t1)/(double) CLOCKS_PER_SEC;
+				printf("Odd Terms Quick Median of  %d elements: %f\n",N, T2);
+				
 				#if DEBUG		
 				for(i=0;i<N;++i)
 				{
 					printf("AFTER:y[%d]=%d\n",i,y[i]);
 				}
 				#endif
-				printf("N=%d is odd, the median2:y[%d]=%d\n",N,((N-1)/2), mid);
+				printf("N=%d is odd, the median_odd:y[%d]=%d\n",N,((N-1)/2), mid);
 			}
 			else
 			{
@@ -119,16 +121,15 @@ int main()
 					printf("AFTER:y[%d]=%d\n",i,y[i]);
 				}
 				#endif
-				printf("N=%d is even, the median:(y[%d]+y[%d])/2.0=%f\n",N, (N/2)-1, N/2, (y[(N/2)-1]+y[N/2])/2.0);
+				printf("N=%d is even, the median_even:(y[%d]+y[%d])/2.0=%f\n",N, (N/2)-1, N/2, (y[(N/2)-1]+y[N/2])/2.0);
 			}		
 		}
 		
-	//	free(x);
+		free(x);
 		free(y);
 	} 	
 	return 0;
 }
-
 //=======================================  ¨ç    ¦¡    °Ï  ========================================
 
 int partition(int *x, int left, int right)
@@ -196,7 +197,8 @@ int partition(int *x, int left, int right)
 
 int median_even(int *x, int left, int right)
 {
-	if(left == right-1) return x[left];
+	if(left == right-1) //return x[left];
+		return 1;
 	int midIndex1 = (right-left)/2-1;
 	int midIndex2 = (right-left)/2;
 	int pivIndex = -1;
@@ -218,8 +220,7 @@ int median_even(int *x, int left, int right)
 			#if DEBUG2
 			printf("pivIndex < midIndex, left=%d, right=%d\n", left, right);
 			#endif
-		}
-			
+		}			
 		else if(pivIndex > midIndex2)
 		{ 
 			right = pivIndex;
@@ -248,8 +249,7 @@ int median_even(int *x, int left, int right)
 				#if DEBUG2
 				printf("pivIndex < midIndex, left=%d, right=%d\n", left, right);
 				#endif
-			}
-				
+			}				
 			else if(pivIndex > midIndex2)
 			{ 
 				right = pivIndex;
@@ -294,8 +294,6 @@ int median_even(int *x, int left, int right)
 		pivIndex1 = pivIndex;
 	//	median = (x[pivIndex1]+x[pivIndex2])/2.0;
 	}
-
-	
 //	return median;
 }
 
@@ -321,8 +319,7 @@ int median_odd(int *x, int left, int right)
 			#if DEBUG2
 			printf("pivIndex < midIndex, left=%d, right=%d\n", left, right);
 			#endif
-		}
-			
+		}			
 		else if(pivIndex > midIndex)
 		{ 
 			right = pivIndex;
