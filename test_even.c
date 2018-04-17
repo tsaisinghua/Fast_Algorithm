@@ -23,7 +23,7 @@ int main()
 //	int x[8]={0,7,5,9,2,10,6,3};
 	srand( time(NULL) );
 
-	for(N=999961;N<=1000000;N++)
+	for(N=999999;N<=1000000;N++)
 	{
 		x = (int *) malloc( N * sizeof(int) );
 		y = (int *) malloc( N * sizeof(int) );
@@ -85,13 +85,13 @@ int main()
 		}
 		#endif
 		//if (median_odd(y,0,N) < 0 || (median_even1(y,0,N) + median_even2(y,0,N)) < 0)
-/*		
+		
 		if (median_odd(y,0,N) < 0) 
 		{	
 			printf("ERROR!\n");
 		}
 		else
-*/		{
+		{
 			if(N%2==1)
 			{
 				t1 = clock();
