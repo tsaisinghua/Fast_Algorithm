@@ -6,8 +6,8 @@
 #define DEBUG 0
 int main()
 {
-	int n, k, N = 1024;
-	double c, s, theta, *X_re, *X_im, *x_re, *x_im;
+	int n, k, N = 1<<15;
+	double ca, sa, a, theta, c, s, t, *X_re, *X_im, *x_re, *x_im;
 	clock_t t1, t2;
 	
 	X_re = (double *) malloc(N*sizeof(double));
@@ -26,17 +26,30 @@ int main()
 	{
 		X_re[k] = 0.0;
 		X_im[k] = 0.0;
-		// x_n = x_re + i* x_im
-		// x_n *(cos(...)- i * sin(...))
-		//real:x_re * cos(...) +  x_im * sin(...)
-		//image:x_im * cos(...) -  x_re * sin(...)
+		//   cos(2*PI*k*n/N) n = 0, 1, 2, 3...
+		//   theta = n * (2*PI*k/N) = n * a
+		//   cos(n a) -> cos((n+1)a) = cos(na) cos(a) - sin(na) sin(a)
+		//   sin(n a) -> sin((n+1)a) = sin(na) cos(a) + cos(na) sin(a)
+		a  = 2*M_PI*k/N;
+		ca = cos(a);
+		sa = sin(a);
+		c  = 1.0;
+		s  = 0.0;
+		
 		for(n=0;n<N;++n)
 		{
-			theta = 2*M_PI*k*n/N;
-			c = cos(theta);
-			s = sin(theta);
+			// x_n = x_re + i* x_im
+			// x_n *(cos(...)- i * sin(...))
+			// real:x_re * cos(...) +  x_im * sin(...)
+			// image:x_im * cos(...) -  x_re * sin(...)
+			// theta = 2*M_PI*k*n/N;
+			// c = cos(theta);
+			// s = sin(theta);
 			X_re[k] += x_re[n] * c +  x_im[n] * s;
 			X_im[k] += x_im[n] * c -  x_re[n] * s;
+			t =  c;
+			c =  c*ca - s*sa;
+			s =  s*ca + t*sa; 
 		}
 	}
 	t2 = clock();	
