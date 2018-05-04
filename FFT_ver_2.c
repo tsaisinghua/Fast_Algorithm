@@ -27,11 +27,12 @@ int bit_reverse(double *x_re, double *x_im, int N)
     int m,p,q,k;
     double t;
     
-    m = N/2;                        // Bit-Reverse 每次要進位的數字 
+    m = N/2;                      	// Bit-Reverse 每次要進位的數字 
     q = m;							// p = 1, q = m (第一個要交換的) 
     for(p=1;p<N-1;++p)
     {
-        //printf("%d <-> %d\n", p,q);
+        printf("m=%d, q=%d, %d <-> %d\n",m,q,p,q);
+        
         if(p < q)
         {
             t = x_re[p];
@@ -47,12 +48,16 @@ int bit_reverse(double *x_re, double *x_im, int N)
 									// (0010) = 2  >= (2=k)
 									// (0000) = 0  >= (1=k) X break --> (0001)
 									// (0110) = 6  >= (8=k) X break --> (1110) 
-        while(q >= k & k > 0)		// q >=k 第 (log_2 k + 1)位是1,  
+        printf("k=%d\n",k);
+		while(q >= k & k > 0)		// q >=k 第 (log_2 k + 1)位是1,  
         {
+        	printf("1.q=%d, k=%d\n",q,k);
             q = q-k;				// 1->0
             k = k/2;				// 檢查下一位 
         }
         q = q+k;
+        printf("2.q=%d, k=%d\n",q,k);
+  		printf("========================\n");      
     }
     return 0;
 }
