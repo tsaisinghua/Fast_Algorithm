@@ -77,12 +77,13 @@ int butterfly(double *x_re, double *x_im, int N)
 {
 	int k, p, q, m;
 	double w_re, w_im, w_N_re, w_N_im, t, theta; 
-	m = 1;
-	while(m<N)
+	//m = 1;
+	for(m=1;m<N;m*=2)
 	{
 		w_re = 1.0;
 		w_im = 0.0; 
 		theta = M_PI/m;		//找下一個 W_N 要加的角度	
+		printf("%f\n", theta);
 		w_N_re =  cos(theta);
 		w_N_im = -sin(theta);
 		for(k=0;k<m;++k) 
@@ -90,7 +91,7 @@ int butterfly(double *x_re, double *x_im, int N)
 			for(p=k;p<N;p+=2*m)
 			{
 				q = p + m;
-				// printf("(%d,%d) (%f,%f) FFT2 \n", p,q, w_re, w_im);
+				printf("(%d,%d) (%f,%f) FFT2 \n", p,q, w_re, w_im);
 				// multiply (w_re + w_im * i) on x[q]
 				t = x_re[q]; 
 				x_re[q] = w_re*x_re[q] - w_im*x_im[q];
@@ -102,14 +103,12 @@ int butterfly(double *x_re, double *x_im, int N)
 				t = x_im[p];
 				x_im[p] = x_im[p] + x_im[q];
 				x_im[q] = t       - x_im[q]; 
-				//
-				
 			}
 			t    = w_re; 
 			w_re = w_N_re*w_re - w_N_im*w_im;
 			w_im = w_N_re*w_im + w_N_im*t;
 		}
-		m = m * 2;
+		//m = m * 2;
 	}
 	
 	return;
