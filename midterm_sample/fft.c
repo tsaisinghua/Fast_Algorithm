@@ -8,16 +8,16 @@
 
 #include "fft.h"
 
-void swap(double *p,double *q){
+void swap(double *p,double *q)
+{
     double tmp;
     tmp=*p;
     *p=*q;
     *q=tmp;
-    
 }
 
-
-int fft(double *x_r, double *x_i, double *y_r, double *y_i, int N){
+int fft(double *x_r, double *x_i, double *y_r, double *y_i, int N)
+{
 	//int c;
 	//double theta,theta1;
 	//double w_r,w_i,wk_r,wk_i;
@@ -29,17 +29,14 @@ int fft(double *x_r, double *x_i, double *y_r, double *y_i, int N){
     int order[100];
 
 	//termination conditions
-	if(N==1){
-		
+	if(N==1)
+	{
 		y_r[0] = x_r[0];
 		y_i[0] = x_i[0];
-		
+	
 		return 0;
 	}
-    
-
-    
-    
+        
     for(n=0;n<N;++n)
     {
         y_r[n] = x_r[n];
@@ -48,19 +45,27 @@ int fft(double *x_r, double *x_i, double *y_r, double *y_i, int N){
     
     N0=N;
     p=1;
-    while (N0>1) {
-        if ((N0%2)==0) {
+    while (N0>1) 
+	{
+        if ((N0%2)==0) 
+		{
             p=2;
-        }else if ((N0%3)==0){
+        }
+		else if ((N0%3)==0)
+		{
             p=3;
-		}else if ((N0%5)==0){
+		}
+		else if ((N0%5)==0)
+		{
 			p=5;
-		}else{
+		}
+		else
+		{
             p=1;
         }
         M0=0;
-        while (M0<N) {
-            
+        while (M0<N) 
+		{
             groupn(y_r+M0, y_i+M0, N0, p);
             M0+=N0;
         }
@@ -68,24 +73,18 @@ int fft(double *x_r, double *x_i, double *y_r, double *y_i, int N){
         m++;
         N0/=p;
     }
-    
-    
-    
-    while (N0<N) {
+	      
+    while (N0<N) 
+	{
         m--;
         butterfly(y_r, y_i, N, order[m],N0);
-        
-        
         N0*=order[m];
     }
-	
-	
 	return 0;
 }
 
-
-
-int print_complex(double *r, double *i, int N){
+int print_complex(double *r, double *i, int N)
+{
 	int n;
 	for(n=0;n<N;++n)
 	{
@@ -98,14 +97,14 @@ int print_complex(double *r, double *i, int N){
 	return 0;
 }
 
-int bit_reverse(double *y_r, double *y_i, int N,int c){
+int bit_reverse(double *y_r, double *y_i, int N,int c)
+{
     int m,p,q,k;
     m = N/c;
     q = m;
     for(p=1;p<N-1;++p)
     {
-        //printf("%d <-> %d\n", p,q);
-        
+        //printf("%d <-> %d\n", p,q);      
         if(p < q)
         {
             //printf("%d,%d\n",p,q);
@@ -121,14 +120,13 @@ int bit_reverse(double *y_r, double *y_i, int N,int c){
             //printf("%d,%d\n",q,k);
         }
         q = q+k;
-        
     }
     print_complex(y_r, y_i, N);
     return 0;
 }
 
-
-int butterfly(double *y_r, double *y_i, int N,int c,int n){
+int butterfly(double *y_r, double *y_i, int N,int c,int n)
+{
     double theta,theta1;
     double w_r,w_i,wk_r,wk_i;
     int k;
@@ -139,18 +137,20 @@ int butterfly(double *y_r, double *y_i, int N,int c,int n){
     int p, q,r,s,t;
 
     n=n*c;
-    switch( c ){
-            
+    switch( c )
+	{  
         case 2:
 
             //n = 2;
             //while(n <= N && ((2*N/n)%2)==0){
-                for(k=0;k<n/2;k++){
+     			for(k=0;k<n/2;k++)
+				{
                     theta = -2.0*k*M_PI/n;
                     w_r = cos(theta);
                     w_i = sin(theta);
                     
-                    for(p=k;p<N;p+=n){
+                    for(p=k;p<N;p+=n)
+					{
                         q = p+n/2;
                         t_r = w_r*y_r[q]-w_i*y_i[q];
                         t_i = w_r*y_i[q]+w_i*y_r[q];
@@ -158,15 +158,10 @@ int butterfly(double *y_r, double *y_i, int N,int c,int n){
                         y_i[q] = y_i[p] - t_i;
                         y_r[p] = y_r[p] + t_r;
                         y_i[p] = y_i[p] + t_i;
-                        
-                    }
-                    
+                    }                   
                 }
                 //n = n * 2;
-                
             //}
-            
-            
             break;
         case 3:
             //n = 3;
@@ -174,7 +169,8 @@ int butterfly(double *y_r, double *y_i, int N,int c,int n){
 			theta1 = -2.0*M_PI/3;
 			wk_r= cos(theta1);
 			wk_i= sin(theta1);
-                for(k=0;k<n/3;k++){
+                for(k=0;k<n/3;k++)
+				{
                     theta = -2.0*k*M_PI/n;
                     w_r = cos(theta);
                     w_i = sin(theta);
@@ -189,8 +185,6 @@ int butterfly(double *y_r, double *y_i, int N,int c,int n){
                         t_2r= (w_r*w_r-w_i*w_i)*y_r[r]-(w_r*w_i+w_r*w_i)*y_i[r];
                         t_2i= (w_r*w_r-w_i*w_i)*y_i[r]+(w_r*w_i+w_r*w_i)*y_r[r];
                         
-						
-						
 						y_r[r]=y_r[p]
 						+wk_r*(t_r+t_2r)+wk_i*(t_i-t_2i);
 						y_i[r]=y_i[p]
@@ -206,7 +200,6 @@ int butterfly(double *y_r, double *y_i, int N,int c,int n){
                     }
                 }
                 //n = n * 3;
-			
             //}
             break;
 		case 5:
@@ -270,40 +263,30 @@ int butterfly(double *y_r, double *y_i, int N,int c,int n){
 				}
 			}
 			//n = n * 3;
-			
 			//}
 			break;
-
-			
-			
-            //print_complex(y_r, y_i, N);
-			
-    }
-	
+            //print_complex(y_r, y_i, N);			
+    }	
     return 0;
-
 }
 
-
-
-int groupn(double *x_r,double *x_i,int N,int p){
+int groupn(double *x_r,double *x_i,int N,int p)
+{
     int n,m;
     double *u_r,*u_i;
 	
     u_r= (double *) malloc(N*sizeof(double));
     u_i= (double *) malloc(N*sizeof(double));
-
 	
     for(n=0;n<N/p;n++)
     {
 		
-        for (m=0; m<p; m++) {
+        for (m=0; m<p; m++) 
+		{
             u_r[n+m*N/p] = x_r[p*n+m];
             u_i[n+m*N/p] = x_i[p*n+m];
-
         }
     }
-	
 	
     for(n=0;n<N;n++)
     {
@@ -316,9 +299,8 @@ int groupn(double *x_r,double *x_i,int N,int p){
     return 0;
 }
 
-
-
-int ifft(double *x_r, double *x_i, double *y_r, double *y_i, int N){
+int ifft(double *x_r, double *x_i, double *y_r, double *y_i, int N)
+{
 	//int c;
 	//double theta,theta1;
 	//double w_r,w_i,wk_r,wk_i;
@@ -330,16 +312,13 @@ int ifft(double *x_r, double *x_i, double *y_r, double *y_i, int N){
 	int order[100];
 	
 	//termination conditions
-	if(N==1){
-		
+	if(N==1)
+	{		
 		y_r[0] = x_r[0];
 		y_i[0] = x_i[0];
 		
 		return 0;
 	}
-	
-	
-	
 	
 	for(n=0;n<N;++n)
 	{
@@ -349,19 +328,27 @@ int ifft(double *x_r, double *x_i, double *y_r, double *y_i, int N){
 	
 	N0=N;
 	p=1;
-	while (N0>1) {
-		if ((N0%2)==0) {
+	while (N0>1) 
+	{
+		if ((N0%2)==0) 
+		{
 			p=2;
-		}else if ((N0%3)==0){
+		}
+		else if ((N0%3)==0)
+		{
 			p=3;
-		}else if ((N0%5)==0){
+		}
+		else if ((N0%5)==0)
+		{
 			p=5;
-		}else{
+		}
+		else
+		{
 			p=1;
 		}
 		M0=0;
-		while (M0<N) {
-			
+		while (M0<N) 
+		{
 			groupn(y_r+M0, y_i+M0, N0, p);
 			M0+=N0;
 		}
@@ -370,13 +357,10 @@ int ifft(double *x_r, double *x_i, double *y_r, double *y_i, int N){
 		N0/=p;
 	}
 	
-	
-	
-	while (N0<N) {
+	while (N0<N) 
+	{
 		m--;
-		ibutterfly(y_r, y_i, N, order[m],N0);
-		
-		
+		ibutterfly(y_r, y_i, N, order[m],N0);	
 		N0*=order[m];
 	}
 	
@@ -385,12 +369,11 @@ int ifft(double *x_r, double *x_i, double *y_r, double *y_i, int N){
 		y_r[n] = y_r[n]/N;
 		y_i[n] = y_i[n]/N;
 	}
-	
-	
 	return 0;
 }
 
-int ibutterfly(double *y_r, double *y_i, int N,int c,int n){
+int ibutterfly(double *y_r, double *y_i, int N,int c,int n)
+{
 	double theta,theta1;
 	double w_r,w_i,wk_r,wk_i;
 	int k;
@@ -401,34 +384,30 @@ int ibutterfly(double *y_r, double *y_i, int N,int c,int n){
 	int p, q,r,s,t;
 	
 	n=n*c;
-	switch( c ){
-			
-		case 2:
-			
+	switch( c )
+	{
+		case 2:		
 			//n = 2;
 			//while(n <= N && ((2*N/n)%2)==0){
-			for(k=0;k<n/2;k++){
+			for(k=0;k<n/2;k++)
+			{
 				theta = 2.0*k*M_PI/n;
 				w_r = cos(theta);
 				w_i = sin(theta);
 				
-				for(p=k;p<N;p+=n){
+				for(p=k;p<N;p+=n)
+				{
 					q = p+n/2;
 					t_r = w_r*y_r[q]-w_i*y_i[q];
 					t_i = w_r*y_i[q]+w_i*y_r[q];
 					y_r[q] = y_r[p] - t_r;
 					y_i[q] = y_i[p] - t_i;
 					y_r[p] = y_r[p] + t_r;
-					y_i[p] = y_i[p] + t_i;
-					
+					y_i[p] = y_i[p] + t_i;	
 				}
-				
 			}
 			//n = n * 2;
-			
 			//}
-			
-			
 			break;
 		case 3:
 			//n = 3;
@@ -436,12 +415,12 @@ int ibutterfly(double *y_r, double *y_i, int N,int c,int n){
 			theta1 = 2.0*M_PI/3;
 			wk_r= cos(theta1);
 			wk_i= sin(theta1);
-			for(k=0;k<n/3;k++){
+			for(k=0;k<n/3;k++)
+			{
 				theta = 2.0*k*M_PI/n;
 				w_r = cos(theta);
 				w_i = sin(theta);
 				//printf("n=%d,w=%f+%f,w2=%f+%f\n",n,w_r,w_i,wk_r,wk_i);
-				
 				for(p=k;p<N;p+=n)
 				{
 					q = p+n/3;
@@ -451,24 +430,17 @@ int ibutterfly(double *y_r, double *y_i, int N,int c,int n){
 					t_2r= (w_r*w_r-w_i*w_i)*y_r[r]-(w_r*w_i+w_r*w_i)*y_i[r];
 					t_2i= (w_r*w_r-w_i*w_i)*y_i[r]+(w_r*w_i+w_r*w_i)*y_r[r];
 					
+					y_r[r]=y_r[p]+wk_r*(t_r+t_2r)+wk_i*(t_i-t_2i);
+					y_i[r]=y_i[p]+wk_r*(t_i+t_2i)-wk_i*(t_r-t_2r);
 					
-					
-					y_r[r]=y_r[p]
-					+wk_r*(t_r+t_2r)+wk_i*(t_i-t_2i);
-					y_i[r]=y_i[p]
-					+wk_r*(t_i+t_2i)-wk_i*(t_r-t_2r);
-					
-					y_r[q]=y_r[p]
-					+wk_r*(t_r+t_2r)-wk_i*(t_i-t_2i);//wk^1
-					y_i[q]=y_i[p]
-					+wk_r*(t_i+t_2i)+wk_i*(t_r-t_2r);
+					y_r[q]=y_r[p]+wk_r*(t_r+t_2r)-wk_i*(t_i-t_2i);//wk^1
+					y_i[q]=y_i[p]+wk_r*(t_i+t_2i)+wk_i*(t_r-t_2r);
 					
 					y_r[p]=y_r[p]+t_r+t_2r;
 					y_i[p]=y_i[p]+t_i+t_2i;
 				}
 			}
-			//n = n * 3;
-			
+			//n = n * 3;			
 			//}
 			break;
 		case 5:
@@ -531,17 +503,10 @@ int ibutterfly(double *y_r, double *y_i, int N,int c,int n){
 					y_i[p]=y_i[p]+t_i+t_2i+t_3i+t_4i;
 				}
 			}
-			//n = n * 3;
-			
+			//n = n * 3;			
 			//}
 			break;
-			
-			
-			
-			//print_complex(y_r, y_i, N);
-			
-	}
-	
-	return 0;
-	
+			//print_complex(y_r, y_i, N);			
+	}	
+	return 0;	
 }

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <math.h>
+#define DEBUG 0
 
 int main()
 {
@@ -12,8 +13,7 @@ int main()
 		x_im[i] = 0.0;
 	}
 	bit_reverse(x_re, x_im, 8);	
-	butterfly(x_re, x_im, 8);
-	
+	butterfly(x_re, x_im, 8);	
 	for(i=0;i<8;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
@@ -21,7 +21,6 @@ int main()
 	return;
 	 
 }
-
 int bit_reverse(double *x_re, double *x_im, int N)
 {
     int m,p,q,k;
@@ -31,7 +30,10 @@ int bit_reverse(double *x_re, double *x_im, int N)
     q = m;							// p = 1, q = m (第一個要交換的) 
     for(p=1;p<N-1;++p)
     {
+    	printf("p=%d <-> q=%d\n",p,q);
+    	#if DEBUG
         printf("m=%d, q=%d, %d <-> %d\n",m,q,p,q);
+        #endif
         
         if(p < q)
         {
@@ -48,30 +50,41 @@ int bit_reverse(double *x_re, double *x_im, int N)
 									// (0010) = 2  >= (2=k)
 									// (0000) = 0  >= (1=k) X break --> (0001)
 									// (0110) = 6  >= (8=k) X break --> (1110) 
-        printf("k=%d\n",k);
+        #if DEBUG
+		printf("k=%d\n",k);
+		#endif
+		
 		while(q >= k & k > 0)		// q >=k 第 (log_2 k + 1)位是1,  
         {
+        	#if DEBUG
         	printf("1.q=%d, k=%d\n",q,k);
+        	#endif
+        	
             q = q-k;				// 1->0
             k = k/2;				// 檢查下一位 
         }
         q = q+k;
+        
+        #if DEBUG
         printf("2.q=%d, k=%d\n",q,k);
-  		printf("========================\n");      
+  		printf("========================\n");
+		#endif      
     }
     return 0;
 }
+
 int butterfly(double *x_re, double *x_im, int N)
 {
 	int k, p, q, m;
-	double w_re, w_im, w_N_re, w_N_im, t; 
+	double w_re, w_im, w_N_re, w_N_im, t, theta; 
 	m = 1;
 	while(m<N)
 	{
 		w_re = 1.0;
-		w_im = 0.0; 		
-		w_N_re =  cos(M_PI/m);
-		w_N_im = -sin(M_PI/m);
+		w_im = 0.0; 
+		theta = M_PI/m;		//找下一個 W_N 要加的角度	
+		w_N_re =  cos(theta);
+		w_N_im = -sin(theta);
 		for(k=0;k<m;++k) 
 		{
 			for(p=k;p<N;p+=2*m)
