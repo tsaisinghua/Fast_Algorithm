@@ -6,15 +6,15 @@
 int main()
 {
 	int i;
-	double y_re[27], y_im[27], x_re[27], x_im[27];
-	for(i=0;i<27;++i)
+	double y_re[9], y_im[9], x_re[9], x_im[9];
+	for(i=0;i<9;++i)
 	{
 		x_re[i] = i;
 		x_im[i] = 0.0;
 	}
-	bit_reverse(x_re, x_im, 27);	
-	butterfly(x_re, x_im, 27);	
-	for(i=0;i<27;++i)
+	bit_reverse(x_re, x_im, 9);	
+	butterfly(x_re, x_im, 9);	
+	for(i=0;i<9;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
 	}
@@ -90,11 +90,16 @@ int butterfly(double *x_re, double *x_im, int N)
 		w_N_re =  cos(theta1);
 		w_N_im = -sin(theta1);
 		for(k=0;k<m;k++)
-		{				
+		{	
+			/*
+			w_re = 1.0;
+			w_im = 0.0;
+			*/ 			
 			theta = (2.0/3)*k*M_PI/m;		// 設定 w_re 及 w_im 的起始值 (m = 1, k = 0) => theta = 0; w_re = 1.0, w_im = 0.0 
             w_re =  cos(theta);				//							  (m = 3, k = 0) => theta = 0; w_re = 1.0, w_im = 0.0	
             w_im = -sin(theta);				//							  (m = 3, k = 1) => theta = (2/9)*pi; w_re = cos((2/9)*pi), w_im = -sin((2/9)*pi)          
-			for(p=k;p<N;p+=3*m)				//							  (m = 3, k = 2) => theta = (4/9)*pi; w_re = cos((4/9)*pi), w_im = -sin((4/9)*pi)  
+											//							  (m = 3, k = 2) => theta = (4/9)*pi; w_re = cos((4/9)*pi), w_im = -sin((4/9)*pi)  
+			for(p=k;p<N;p+=3*m)				
 			{
 				q = p + m;
 				r = q + m;
@@ -151,11 +156,11 @@ int butterfly(double *x_re, double *x_im, int N)
 				x_im[p] = t_ip + t_iq + t_ir;	
 				
 			}		
-			/*
+			
 			t    = w_re;
 			w_re = w_N_re * w_re - w_N_im * w_im;
 			w_im = w_N_re * w_im + w_N_im *t;
-			*/
+			
 		}	
 		//m = m * 3;
 	}
