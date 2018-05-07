@@ -6,15 +6,15 @@
 int main()
 {
 	int i;
-	double y_re[27], y_im[27], x_re[27], x_im[27];
-	for(i=0;i<27;++i)
+	double y_re[125], y_im[125], x_re[125], x_im[125];
+	for(i=0;i<125;++i)
 	{
 		x_re[i] = i;
 		x_im[i] = 0.0;
 	}
-	bit_reverse(x_re, x_im, 27);	
-	butterfly(x_re, x_im, 27);	
-	for(i=0;i<27;++i)
+	bit_reverse(x_re, x_im, 125);	
+	//butterfly(x_re, x_im, 125);	
+	for(i=0;i<125;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
 	}
@@ -25,7 +25,7 @@ int bit_reverse(double *x_re, double *x_im, int N)
     int m,p,q,k;
     double t;
     
-    m = N/3;                      	// Bit-Reverse 每次要進位的數字 
+    m = N/5;                      	// Bit-Reverse 每次要進位的數字 
     q = m;							// p = 1, q = m (第一個要交換的) 
     for(p=1;p<N-1;++p)
     {
@@ -44,19 +44,19 @@ int bit_reverse(double *x_re, double *x_im, int N)
 			x_im[q] = t;			 
         }
         
-        k = m;						// k, 用來檢查第 log_3 k + 1 位是不是1 
+        k = m;						// k, 用來檢查第 log_5 k + 1 位是不是1 
         #if DEBUG
 		printf("k=%d\n",k);
 		#endif
 		
-		while(q >= 2*k & k > 0)		// q >=k 第 (log_2 k + 1)位是1,  
+		while(q >= 4*k & k > 0)		// q >=k 第 (log_5 k + 1)位是1,  
         {
         	#if DEBUG
         	printf("1.q=%d, k=%d\n",q,k);
         	#endif
         	
-            q = q-2*k;				// 1->0
-            k = k/3;				// 檢查下一位 
+            q = q-4*k;				// 1->0
+            k = k/5;				// 檢查下一位 
         }
         q = q+k;
         
@@ -70,18 +70,18 @@ int bit_reverse(double *x_re, double *x_im, int N)
 
 int butterfly(double *x_re, double *x_im, int N)
 {
-	int k, p, q, r, m;
+	int k, p, q, r, s, t, m;
 	double theta, theta1;
 	double w_re, w_im, w_N_re, w_N_im;
-	double t, t_rp, t_rq, t_rr;
-	double t_ip, t_iq, t_ir;
+	double t, t_rp, t_rq, t_rr, t_rs, t_rt;
+	double 	  t_ip, t_iq, t_ir, t_is, t_it;
 	
 	//m = 1;
-	for(m=1;m<N;m*=3)
+	for(m=1;m<N;m*=5)
 	{
 		//w_re = 1.0;
 		//w_im = 0.0;		
-		theta1 = 2.0*M_PI/3;				// 找下一個 W_N 要加的角度 (W_3)^0 = 1 + i*0 
+		theta1 = 2.0*M_PI/5;				// 找下一個 W_N 要加的角度 (W_3)^0 = 1 + i*0 
 											// => (W_3)^1 = cos(2*M_PI/3.0) -i*sin(2*M_PI/3.0) 
 											// => (W_3)^2 = cos(4*M_PI/3.0) -i*sin(4*M_PI/3.0) = cos(2*M_PI/3.0) + i*sin(2*M_PI/3.0)
 											// => (W_3)^3 = 1 +i*0
@@ -94,25 +94,42 @@ int butterfly(double *x_re, double *x_im, int N)
 			w_re = 1.0;
 			w_im = 0.0;
 			*/ 			
-			theta = (2.0/3)*k*M_PI/m;		// 設定 w_re 及 w_im 的起始值 (m = 1, k = 0) => theta = 0; w_re = 1.0, w_im = 0.0 
-            w_re =  cos(theta);				//							  (m = 3, k = 0) => theta = 0; w_re = 1.0, w_im = 0.0	
-            w_im = -sin(theta);				//							  (m = 3, k = 1) => theta = (2/9)*pi; w_re = cos((2/9)*pi), w_im = -sin((2/9)*pi)          
-											//							  (m = 3, k = 2) => theta = (4/9)*pi; w_re = cos((4/9)*pi), w_im = -sin((4/9)*pi)  
-			for(p=k;p<N;p+=3*m)				
+			theta = (2.0/5)*k*M_PI/m;		
+            w_re =  cos(theta);				
+            w_im = -sin(theta);			
+			 
+			for(p=k;p<N;p+=5*m)		
 			{
 				q = p + m;
 				r = q + m;
-				printf("(%d,%d,%d) (%f,%f) FFT2 \n", p, q, r, w_re, w_im);
+				s = r + m;
+				t = s + m;
+				printf("(%d,%d,%d,%d,%d) (%f,%f) FFT2 \n", p, q, r, s, t, w_re, w_im);
 				 
 				// multiply (w_re + w_im * i) on x[q]
 				t_rq = x_re[q];
 				x_re[q] = w_re * x_re[q] - w_im * x_im[q];
 				x_im[q] = w_re * x_im[q] + w_im * t_rq;
-				// multiply (w_re + w_im * i)^2 = (w_re * w_re - w_im * w_im) - (w_re * w_im + w_re * w_im) * i on x[r]
+				// multiply (w_re + w_im * i)^2 = (w_re * w_re - w_im * w_im) + (w_re * w_im + w_re * w_im) * i on x[r]
 				t_rr = x_re[r];
 				x_re[r] = (w_re * w_re - w_im * w_im) * x_re[r] - (w_re * w_im + w_re * w_im)*x_im[r];
 				x_im[r] = (w_re * w_re - w_im * w_im) * x_im[r] + (w_re * w_im + w_re * w_im)*t_rr;
-				
+				// multiply (w_re + w_im * i)^3 = [(w_re * w_re - w_im * w_im) + (w_re * w_im + w_re * w_im)*i]*(w_re + w_im*i) on x[s]
+				//								= ((w_re * w_re - w_im * w_im) * w_re - (w_re * w_im + w_re * w_im) * w_im)
+				//								  + ((w_re * w_re - w_im * w_im) * w_im + (w_re * w_im + w_re * w_im) * w_re)*i
+				//								= (w_re * w_re * w_re - w_im * w_im * w_re - w_re * w_im * w_im - w_re * w_im * w_im)
+				//								  + (w_re * w_re * w_im - w_im * w_im * w_im + w_re * w_im * w_re + w_re * w_im * w_re)*i
+				//								= (w_re * w_re * w_re - 3 * w_re * w_im * w_im) + (3 * w_re * w_re * w_im - w_im * w_im * w_im)*i
+				t_rs = x_re[s];
+				x_re[s] = (w_re * w_re * w_re - 3 * w_re * w_im * w_im) * x_re[s] - (3 * w_re * w_re * w_im - w_im * w_im * w_im) * x_im[s];
+				x_im[s] = (w_re * w_re * w_re - 3 * w_re * w_im * w_im) * x_im[s] + (3 * w_re * w_re * w_im - w_im * w_im * w_im) * t_rs;
+				// multiply (w_re + w_im * i)^4 = (w_re + w_im * i)^2 * (w_re + w_im * i)^2 on x[t]
+				//								= [(w_re * w_re - w_im * w_im) + (2 * w_re * w_im)*i]*[(w_re * w_re - w_im * w_im) + (2 * w_re * w_im)*i]
+				//								= [(w_re * w_re - w_im * w_im)*(w_re * w_re - w_im * w_im) - (2 * w_re * w_im)*(2* w_re * w_im)]
+				//								  + 2*(w_re * w_re - w_im * w_im)*(2 * w_re * w_im)*i
+				t_rs = x_re[t];
+				x_re[t] = ((w_re * w_re - w_im * w_im)*(w_re * w_re - w_im * w_im) - (2 * w_re * w_im)*(2* w_re * w_im))*x_re[t] - 2*(w_re * w_re - w_im * w_im)*(2 * w_re * w_im)*x_im[t];
+				x_im[t] = ((w_re * w_re - w_im * w_im)*(w_re * w_re - w_im * w_im) - (2 * w_re * w_im)*(2* w_re * w_im))*x_im[t] - 2*(w_re * w_re - w_im * w_im)*(2 * w_re * w_im)*x_re[t];
 				//FFT 3 points
 				// (w_re + w_im * i)^2 = w_re - w_im * i
 				// (w_re + w_im * i)^4 = w_re + w_im * i
@@ -131,10 +148,14 @@ int butterfly(double *x_re, double *x_im, int N)
 				
 				t_rp = x_re[p];
 				t_rq = x_re[q];
-				t_rr = x_re[r];				
+				t_rr = x_re[r];
+				t_rs = x_re[s];
+				t_rt = x_re[t];				
 				t_ip = x_im[p];
 				t_iq = x_im[q];	
-				t_ir = x_im[r];			
+				t_ir = x_im[r];	
+				t_is = x_im[s];	
+				t_it = x_im[t];			
 				
 				/*
 				x_re[p] = x_re[p] + x_re[q] + x_re[r];
