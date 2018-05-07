@@ -73,7 +73,7 @@ int butterfly(double *x_re, double *x_im, int N)
 	int k, p, q, r, s, t, m;
 	double theta, theta1;
 	double w_re, w_im, w_N_re, w_N_im;
-	double t, t_rp, t_rq, t_rr, t_rs, t_rt;
+	double temp, t_rp, t_rq, t_rr, t_rs, t_rt;
 	double 	  t_ip, t_iq, t_ir, t_is, t_it;
 	
 	//m = 1;
@@ -168,17 +168,20 @@ int butterfly(double *x_re, double *x_im, int N)
 				printf("(%f+%fi,%f+%fi,%f+%fi) \n", x_re[p], x_im[p], x_re[q], x_im[q], x_re[r], x_im[r]);				
 				*/
 			
-				x_re[p] = t_rp + t_rq + t_rr;				
+				x_re[p] = t_rp + t_rq + t_rr + t_rs + t_rt;				
 				x_re[q] = t_rp + w_N_re * (t_rq + t_rr) - w_N_im * (t_iq - t_ir);
 				x_re[r] = t_rp + w_N_re * (t_rq + t_rr) + w_N_im * (t_iq - t_ir);
+				x_re[s] = t_rp + w_N_re * (t_rq + t_rr) + w_N_im * (t_iq - t_ir);
+				x_re[t] = t_rp + w_N_re * (t_rq + t_rr) + w_N_im * (t_iq - t_ir);
 				
-				x_im[p] = t_ip + t_iq + t_ir;
+				x_im[p] = t_ip + t_iq + t_ir + t_is + t_it;
 				x_im[q] = t_ip + w_N_re * (t_iq + t_ir) + w_N_im * (t_rq - t_rr);
 				x_im[r] = t_ip + w_N_re * (t_iq + t_ir) - w_N_im * (t_rq - t_rr);		
-				
+				x_im[s] = t_ip + w_N_re * (t_iq + t_ir) + w_N_im * (t_rq - t_rr);
+				x_im[t] = t_ip + w_N_re * (t_iq + t_ir) - w_N_im * (t_rq - t_rr);		
 			}		
 			
-			t    = w_re;
+			temp = w_re;
 			w_re = w_N_re * w_re - w_N_im * w_im;
 			w_im = w_N_re * w_im + w_N_im *t;
 			
