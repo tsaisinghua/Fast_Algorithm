@@ -6,19 +6,20 @@
 int main()
 {
 	int i;
-	double y_re[27], y_im[27], x_re[27], x_im[27];
-	for(i=0;i<27;++i)
+	double y_re[9], y_im[9], x_re[9], x_im[9];
+	for(i=0;i<9;++i)
 	{
 		x_re[i] = i;
 		x_im[i] = 0.0;
 	}
-	bit_reverse(x_re, x_im, 27);	
-	butterfly(x_re, x_im, 27);	
-	for(i=0;i<27;++i)
+	bit_reverse(x_re, x_im, 9);	
+	butterfly(x_re, x_im, 9);	
+	for(i=0;i<9;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
 	}
-	return;	 
+	return;
+	 
 }
 int bit_reverse(double *x_re, double *x_im, int N)
 {
@@ -108,7 +109,7 @@ int butterfly(double *x_re, double *x_im, int N)
 				t_rq = x_re[q];
 				x_re[q] = w_re * x_re[q] - w_im * x_im[q];
 				x_im[q] = w_re * x_im[q] + w_im * t_rq;
-				// multiply (w_re + w_im * i)^2 = (w_re * w_re - w_im * w_im) - (w_re * w_im + w_re * w_im) * i on x[r]
+				// multiply (w_re + w_im * i)^2 = w_re - w_im * i on x[r]
 				t_rr = x_re[r];
 				x_re[r] = (w_re * w_re - w_im * w_im) * x_re[r] - (w_re * w_im + w_re * w_im)*x_im[r];
 				x_im[r] = (w_re * w_re - w_im * w_im) * x_im[r] + (w_re * w_im + w_re * w_im)*t_rr;
@@ -146,21 +147,20 @@ int butterfly(double *x_re, double *x_im, int N)
 				x_im[r] = t_ip    + w_re * ( t_iq   +  x_im[r]) - w_im * (t_rq - t_rr);
 				printf("(%f+%fi,%f+%fi,%f+%fi) \n", x_re[p], x_im[p], x_re[q], x_im[q], x_re[r], x_im[r]);				
 				*/
-			
-				x_re[p] = t_rp + t_rq + t_rr;				
-				x_re[q] = t_rp + w_N_re * (t_rq + t_rr) - w_N_im * (t_iq - t_ir);
 				x_re[r] = t_rp + w_N_re * (t_rq + t_rr) + w_N_im * (t_iq - t_ir);
+				x_re[q] = t_rp + w_N_re * (t_rq + t_rr) - w_N_im * (t_iq - t_ir); 
+				x_re[p] = t_rp + t_rq + t_rr;				
 				
-				x_im[p] = t_ip + t_iq + t_ir;
+				x_im[r] = t_ip + w_N_re * (t_iq + t_ir) - w_N_im * (t_rq - t_rr);
 				x_im[q] = t_ip + w_N_re * (t_iq + t_ir) + w_N_im * (t_rq - t_rr);
-				x_im[r] = t_ip + w_N_re * (t_iq + t_ir) - w_N_im * (t_rq - t_rr);		
+				x_im[p] = t_ip + t_iq + t_ir;	
 				
 			}		
-			
+			/*
 			t    = w_re;
 			w_re = w_N_re * w_re - w_N_im * w_im;
 			w_im = w_N_re * w_im + w_N_im *t;
-			
+			*/
 		}	
 		//m = m * 3;
 	}
