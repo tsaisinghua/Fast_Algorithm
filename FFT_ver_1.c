@@ -4,22 +4,23 @@
 int main()
 {
 	int i;
-	double y_re[8], y_im[8], x_re[8], x_im[8];
-	for(i=0;i<8;++i)
+	double y_re[12], y_im[12], x_re[12], x_im[12];
+	for(i=0;i<12;++i)
 	{
-		x_re[i] = i+1;
+		x_re[i] = i;
 		x_im[i] = 0.0;
 	}
-	Fast_Fourier_Transform(y_re, y_im, x_re, x_im, 8);
-	for(i=0;i<8;++i)
+	Fast_Fourier_Transform(y_re, y_im, x_re, x_im, 12);
+	for(i=0;i<12;++i)
 	{
 		printf("%f + %f i\n", y_re[i], y_im[i]);
 	}
-	
-	 
 }
 int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_im, int N)
 {
+	double theta1, w_N_re, w_N_im;
+	//double t_r1, t_r2;
+	
 	if(N==2) 
 	{
 		// y, y[0] = x[0]+x[1], y[1] = x[0] - x[1]
@@ -27,7 +28,23 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 		y_im[0] = x_im[0] + x_im[1];
 		y_re[1] = x_re[0] - x_re[1]; 
 		y_im[1] = x_im[0] - x_im[1];
-	} else 
+	}
+	else if(N==3)
+	{
+		// y, y[0] = x[0]+x[1]+x[2], y[1] = x[0] +W_3 * x[1] + w_3^2 * x[2], y[2] = x[0] +W_3^2 * x[1] + w_3 * x[2]
+		theta1 = 2.0*M_PI/3;
+		w_N_re =  cos(theta1);
+		w_N_im = -sin(theta1);
+		y_re[0] = x_re[0] + x_re[1] + x_re[2];
+		y_im[0] = x_im[0] + x_im[1] + x_im[2];
+		//t_r1 = x_re[1];
+		y_re[1] = x_re[0] + w_N_re * (x_re[1] + x_re[2]) - w_N_im * (x_im[1] - x_im[2]);
+		y_im[1] = x_im[0] + w_N_re * (x_im[1] + x_im[2]) + w_N_im * (x_re[1] - x_re[2]);
+		//t_r2 = x_re[2];
+		y_re[2] = x_re[0] + w_N_re * (x_re[1] + x_re[2]) + w_N_im * (x_im[1] - x_im[2]);
+		y_im[2] = x_im[0] + w_N_re * (x_im[1] + x_im[2]) - w_N_im * (x_re[1] - x_re[2]);
+	}
+	else if (N>2 && (N%2)==0)
 	{
 		int k;
 		double *y_even_re, *y_even_im, *y_odd_re, *y_odd_im;

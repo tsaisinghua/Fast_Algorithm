@@ -3,18 +3,28 @@
 #include <math.h>
 #define DEBUG 0
 
+
 int main()
 {
-	int i;
-	double y_re[8], y_im[8], x_re[8], x_im[8];
-	for(i=0;i<8;++i)
+	int i, p, q, r, N;
+	/*
+	printf("input 2^p 3^q 5^r : (p, q, r) = ");
+	scanf("%d %d %d", &p, &q, &r);
+	*/
+	p = 3;
+	q = 0;
+	r = 0;
+	N = pow(2, p) * pow(3, q) * pow(5, r);
+	printf("N=%d\n",N);
+	double y_re[N], y_im[N], x_re[N], x_im[N];
+	for(i=0;i<N;++i)
 	{
 		x_re[i] = i;
 		x_im[i] = 0.0;
 	}
-	bit_reverse(x_re, x_im, 8);	
-	butterfly(x_re, x_im, 8);	
-	for(i=0;i<8;++i)
+	bit_reverse(x_re, x_im, N);
+	butterfly(x_re, x_im, N);
+	for(i=0;i<N;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
 	}

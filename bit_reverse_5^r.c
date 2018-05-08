@@ -6,15 +6,15 @@
 int main()
 {
 	int i;
-	double y_re[25], y_im[25], x_re[25], x_im[25];
-	for(i=0;i<25;++i)
+	double y_re[125], y_im[125], x_re[125], x_im[125];
+	for(i=0;i<125;++i)
 	{
 		x_re[i] = i;
 		x_im[i] = 0.0;
 	}
-	bit_reverse(x_re, x_im, 25);	
-	butterfly(x_re, x_im, 25);	
-	for(i=0;i<25;++i)
+	bit_reverse(x_re, x_im, 125);	
+	butterfly(x_re, x_im, 125);	
+	for(i=0;i<125;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
 	}
