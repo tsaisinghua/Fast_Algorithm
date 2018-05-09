@@ -17,8 +17,9 @@ int main()
 	srand(time(NULL));
 	p = rand() % 5;
 	q = rand() % 5;
-	r = rand() % 5;*/
-	N = 2*2*2*3*3*3*5*5*5;
+	r = rand() % 5;
+	*/
+	N = 2*2*3*3*3*5*5*5;
 	
 	//N = (int)(pow(2, p) * pow(3, q) * pow(5, r));
 	printf("N=%d\n",N);
@@ -34,7 +35,7 @@ int main()
 	Fast_Fourier_Transform(y_re, y_im, x_re, x_im, N);
 	t2 = clock();
 	T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
-	printf("FFT_ver1 of %d elements: %f\n",N, T1);
+	printf("FFT_ver1 of %d elements: %f secs\n",N, T1);
 		
 	#if DEBUG
 	for(i=0;i<N;++i)
