@@ -4,6 +4,7 @@
 #include <math.h>
 #include <time.h>
 #define DEBUG 0
+
 int main()
 {
 	int i, p, q, r, N;
@@ -17,7 +18,7 @@ int main()
 	p = rand() % 5;
 	q = rand() % 5;
 	r = rand() % 5;*/
-	N = 27000;
+	N = 2*2*2*3*3*3*5*5*5;
 	
 	//N = (int)(pow(2, p) * pow(3, q) * pow(5, r));
 	printf("N=%d\n",N);
@@ -84,8 +85,11 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 		w_N_im = -sin(2.0*M_PI/N);
 		w_re   = 1.0;
 		w_im   = 0.0; 
+		
+		//#pragma omp parallel for 
 		for(k=0;k<N/2;++k)
 		{
+			//#pragma omp ordered
 			a = w_re*y_odd_re[k] - w_im*y_odd_im[k];
 			b = w_re*y_odd_im[k] + w_im*y_odd_re[k];
 			y_re[k]     = y_even_re[k] + a;
@@ -138,8 +142,11 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 		y_32_im = (double *) malloc( N/3 * sizeof(double));
 		x_32_re = (double *) malloc( N/3 * sizeof(double));
 		x_32_im = (double *) malloc( N/3 * sizeof(double));
+		
+		//#pragma omp parallel for ordered
 		for(k=0;k<N/3;++k)
 		{
+			//#pragma omp ordered
 			x_30_re[k] = x_re[3*k];
 			x_30_im[k] = x_im[3*k];
 			x_31_re[k] = x_re[3*k+1];
@@ -154,8 +161,10 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 		w_N_re =  cos(2.0*M_PI/3);
 		w_N_im = -sin(2.0*M_PI/3);
 		
+		//#pragma omp parallel for ordered
 		for(k=0;k<N/3;++k)
 		{
+			//#pragma omp ordered
 			theta = 2.0*k*M_PI/N;
 			w_re  =  cos(theta);
 			w_im  = -sin(theta);
@@ -246,8 +255,10 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 		x_54_re = (double *) malloc( N/5 * sizeof(double));
 		x_54_im = (double *) malloc( N/5 * sizeof(double));
 		
+		//#pragma omp parallel for ordered
 		for(k=0;k<N/5;++k)
 		{
+			//#pragma omp ordered
 			x_50_re[k] = x_re[5*k];
 			x_50_im[k] = x_im[5*k];
 			x_51_re[k] = x_re[5*k+1];
@@ -268,8 +279,10 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 		w_N_re =  cos(2.0*M_PI/5);
 		w_N_im = -sin(2.0*M_PI/5);
 		
+		//#pragma omp parallel for ordered
 		for(k=0;k<N/5;++k)
 		{
+			//#pragma omp ordered
 			theta = 2.0*k*M_PI/N;
 			w_re   =  cos(theta);
 			w_im   = -sin(theta);

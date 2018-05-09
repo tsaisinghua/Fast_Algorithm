@@ -1,33 +1,46 @@
 #include <stdio.h>
 #include <stdlib.h> 
+#include <omp.h>
 #include <math.h>
+#include <time.h>
 #define DEBUG 0
 
 
 int main()
 {
 	int i, p, q, r, N;
+	double T1;
+	clock_t t1, t2;
 	/*
 	printf("input 2^p 3^q 5^r : (p, q, r) = ");
 	scanf("%d %d %d", &p, &q, &r);
 	*/
-	p = 3;
+	p = 15;
 	q = 0;
 	r = 0;
 	N = pow(2, p) * pow(3, q) * pow(5, r);
 	printf("N=%d\n",N);
+	
 	double y_re[N], y_im[N], x_re[N], x_im[N];
 	for(i=0;i<N;++i)
 	{
 		x_re[i] = i;
 		x_im[i] = 0.0;
 	}
+	
+	t1 = clock();
 	bit_reverse(x_re, x_im, N);
 	butterfly(x_re, x_im, N);
+	t2 = clock();
+	T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
+	printf("FFT_ver2 of %d elements: %f\n",N, T1);
+	
+	#if DEBUG
 	for(i=0;i<N;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
 	}
+	#endif
 	return;
 	 
 }
@@ -40,8 +53,8 @@ int bit_reverse(double *x_re, double *x_im, int N)
     q = m;							// p = 1, q = m (第一個要交換的) 
     for(p=1;p<N-1;++p)
     {
+		#if DEBUG
     	printf("p=%d <-> q=%d\n",p,q);
-    	#if DEBUG
         printf("m=%d, q=%d, %d <-> %d\n",m,q,p,q);
         #endif
         
@@ -93,7 +106,9 @@ int butterfly(double *x_re, double *x_im, int N)
 		w_re = 1.0;
 		w_im = 0.0; 
 		theta = M_PI/m;		//找下一個 W_N 要加的角度	
+		#if DEBUG
 		printf("%f\n", theta);
+		#endif 
 		w_N_re =  cos(theta);
 		w_N_im = -sin(theta);
 		for(k=0;k<m;++k) 
@@ -101,7 +116,10 @@ int butterfly(double *x_re, double *x_im, int N)
 			for(p=k;p<N;p+=2*m)
 			{
 				q = p + m;
+				
+        		#if DEBUG
 				printf("(%d,%d) (%f,%f) FFT2 \n", p,q, w_re, w_im);
+				#endif
 				// multiply (w_re + w_im * i) on x[q]
 				t = x_re[q]; 
 				x_re[q] = w_re*x_re[q] - w_im*x_im[q];
@@ -124,18 +142,17 @@ int butterfly(double *x_re, double *x_im, int N)
 	return;
 }
 
-
-
 int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_im, int N)
 {
 	if(N==2) 
 	{
-		// y, y[0] = x[0]+x[1], y[1] = x[0] - x[1]
+		// y, y[0] = x[0] + x[1], y[1] = x[0] - x[1]
 		y_re[0] = x_re[0] + x_re[1];
 		y_im[0] = x_im[0] + x_im[1];
 		y_re[1] = x_re[0] - x_re[1]; 
 		y_im[1] = x_im[0] - x_im[1];
-	} else 
+	} 
+	else 
 	{
 		int k;
 		double *y_even_re, *y_even_im, *y_odd_re, *y_odd_im;
@@ -149,6 +166,7 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 		y_odd_im = (double *) malloc( N/2 * sizeof(double));
 		x_odd_re = (double *) malloc( N/2 * sizeof(double));
 		x_odd_im = (double *) malloc( N/2 * sizeof(double));
+		
 		for(k=0;k<N/2;++k)
 		{
 			x_even_re[k] = x_re[2*k];
