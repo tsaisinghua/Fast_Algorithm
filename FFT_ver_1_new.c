@@ -9,18 +9,18 @@ int main()
 	int i, p, q, r, N;
 	double T1;
 	clock_t t1, t2;
-	/*	
+		
 	printf("input 2^p 3^q 5^r : (p, q, r) = ");
 	scanf("%d %d %d", &p, &q, &r);
-	
+	/*
 	srand(time(NULL));
 	p = rand() % 5;
 	q = rand() % 5;
-	r = rand() % 5;*/
-	N = 27000;
-	
-	//N = (int)(pow(2, p) * pow(3, q) * pow(5, r));
-	printf("N=%d\n",N);
+	r = rand() % 5;
+	N = ;
+	*/
+	N = (int)(pow(2, p) * pow(3, q) * pow(5, r));
+	printf("N = %d\n",N);
 	
 	double y_re[N], y_im[N], x_re[N], x_im[N];
 	for(i=0;i<N;++i)
