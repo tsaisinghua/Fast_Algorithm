@@ -97,6 +97,7 @@ int print_complex(double *r, double *i, int N)
 	return 0;
 }
 
+/*
 int bit_reverse(double *y_r, double *y_i, int N,int c)
 {
     int m,p,q,k;
@@ -124,7 +125,7 @@ int bit_reverse(double *y_r, double *y_i, int N,int c)
     print_complex(y_r, y_i, N);
     return 0;
 }
-
+*/
 int butterfly(double *y_r, double *y_i, int N,int c,int n)
 {
     double theta,theta1;

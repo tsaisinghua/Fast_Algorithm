@@ -3,7 +3,7 @@
 #include <omp.h>
 #include <math.h>
 #include <time.h>
-#define DEBUG 0
+#define DEBUG 1
 
 
 int main()
@@ -15,7 +15,7 @@ int main()
 	printf("input 2^p 3^q 5^r : (p, q, r) = ");
 	scanf("%d %d %d", &p, &q, &r);
 	*/
-	p = 16;
+	p = 3;
 	q = 0;
 	r = 0;
 	N = pow(2, p) * pow(3, q) * pow(5, r);
