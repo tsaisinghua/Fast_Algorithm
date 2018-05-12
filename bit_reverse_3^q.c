@@ -6,7 +6,7 @@
 int main()
 {
 	int i;
-	double y_re[9], y_im[9], x_re[9], x_im[9];
+	double x_re[9], x_im[9];
 	for(i=0;i<9;++i)
 	{
 		x_re[i] = i;

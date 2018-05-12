@@ -7,7 +7,7 @@
 //
 
 #include "fft.h"
-
+#define DEBUG 1
 void swap(double *p,double *q)
 {
     double tmp;
@@ -76,9 +76,19 @@ int fft(double *x_r, double *x_i, double *y_r, double *y_i, int N)
 	      
     while (N0<N) 
 	{
-        m--;
-        butterfly(y_r, y_i, N, order[m],N0);
+        m--;       
+        #if DEBUG
+		printf("original, N0 = %d\n",N0);
+		#endif         
+		butterfly(y_r, y_i, N, order[m],N0);
+		#if DEBUG
+        printf("after butterfly function, N0 = %d\n",N0);
+		#endif
         N0*=order[m];
+		#if DEBUG
+		printf("After N0*=order[m], N0 = %d\n",N0);
+		printf("==========================\n");
+		#endif
     }
 	return 0;
 }
@@ -97,7 +107,7 @@ int print_complex(double *r, double *i, int N)
 	return 0;
 }
 
-/*
+
 int bit_reverse(double *y_r, double *y_i, int N,int c)
 {
     int m,p,q,k;
@@ -125,7 +135,7 @@ int bit_reverse(double *y_r, double *y_i, int N,int c)
     print_complex(y_r, y_i, N);
     return 0;
 }
-*/
+
 int butterfly(double *y_r, double *y_i, int N,int c,int n)
 {
     double theta,theta1;
