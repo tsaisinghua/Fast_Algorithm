@@ -72,29 +72,37 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
     int m, t, p, q, i, k;
     int n = 0;
     int *change_index;
+    int *cyclic;
     m = N/order[n];
     
     change_index = (int*)malloc(2*N*sizeof(int));
+    cyclic = (int*)malloc(N*sizeof(int));
     
 	printf("order[%d] = %d , m = %d\n",n, order[n], m);
 	
 	q = m;
-	
+	i = 2;
+	//第一組 p, q 不動 
+		change_index[0] = 0;
+		change_index[1] = 0;
+		//最後一組 p, q 也不動 
+		change_index[2*N-2] = N-1;
+		change_index[2*N-1] = N-1;
 	for(p=1;p<N-1;p++)
    	{
-   		for(n=2; n<2*(N-1); n += 2)
-	   	{
-	   		change_index[n] = p;
-	   		change_index[n+1] = q;
-	    	printf("n=%d, p=%d, q=%d\n", n, change_index[n], change_index[n+1]);
-	    }
-	  	
-	   	//printf("change_index[%d]= %d, change_index[%d]= %d",n,n+1,change_index[n],change_index[n+1]);
+   		
+		//中間的 p, q 需用 bit_reverse 查看	 
+   		change_index[i] = p;
+	   	change_index[i+1] = q;
 	   	
-	   	#if DEBUG
-	    printf("m=%d, q=%d, %d <-> %d\n",m,q,p,q);
-	    #endif  
-			 
+		
+	   	#if DEBUG 
+	    printf("i_p=%d, p=%d, i_q=%d,  q=%d\n", i, change_index[i], i+1, change_index[i+1]);
+	    printf("p=%d, q=%d\n", change_index[10], change_index[11]);
+	    #endif
+	    i += 2;	  	
+	    		
+		/*	 
 	    if(p < q)
 	    {
 	        t = x_re[p];
@@ -104,7 +112,7 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
 	        x_im[p] = x_im[q];
 			x_im[q] = t;
 	    }
-	        
+	    */  
 		k = m;
 	    n = 0;
 	    while(q >= (order[n]-1)*k & k > 0)
@@ -120,6 +128,26 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
 	  	printf("========================\n");
 		#endif  
 	}
+	
+	p = 1;
+	n = 0;
+	cyclic[0] = p;
+	//printf("p=%d, q=%d\n", change_index[10], change_index[11]);
+	while((change_index[2*p] != change_index[2*p+1]) && (change_index[2*p+1] != cyclic[0]))
+	{
+		cyclic[n] = change_index[2*p];
+		cyclic[n+1] = change_index[2*p+1];
+		p = change_index[2*p+1];
+		n++;
+	}
+	n++;
+	for(i=0;i<n;i++)
+	{
+		printf("cyclic[%d] = %d\n", i, cyclic[i]);	
+	}
 
-return 0;
+	
+	free(change_index);
+	free(cyclic);
+	return 0;
 }
