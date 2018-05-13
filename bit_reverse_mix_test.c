@@ -69,47 +69,57 @@ int FFT(double *x_re, double *x_im, int N)
 //========================================================================
 int bit_reverse(double *x_re, double *x_im, int N, int *order)
 {
-    int m, t, p, q, k;
+    int m, t, p, q, i, k;
     int n = 0;
+    int *change_index;
     m = N/order[n];
-    q = m;
+    
+    change_index = (int*)malloc(2*N*sizeof(int));
     
 	printf("order[%d] = %d , m = %d\n",n, order[n], m);
 	
-	for(p=1;p<N-1;++p)
-    {
-    	
-        printf("p=%d <-> q=%d\n",p,q);
-    	#if DEBUG
-        printf("m=%d, q=%d, %d <-> %d\n",m,q,p,q);
-        #endif  
-		/*  
-        if(p < q)
-        {
-            t = x_re[p];
-            x_re[p] = x_re[q];
+	q = m;
+	
+	for(p=1;p<N-1;p++)
+   	{
+   		for(n=2; n<2*(N-1); n += 2)
+	   	{
+	   		change_index[n] = p;
+	   		change_index[n+1] = q;
+	    	printf("n=%d, p=%d, q=%d\n", n, change_index[n], change_index[n+1]);
+	    }
+	  	
+	   	//printf("change_index[%d]= %d, change_index[%d]= %d",n,n+1,change_index[n],change_index[n+1]);
+	   	
+	   	#if DEBUG
+	    printf("m=%d, q=%d, %d <-> %d\n",m,q,p,q);
+	    #endif  
+			 
+	    if(p < q)
+	    {
+	        t = x_re[p];
+	        x_re[p] = x_re[q];
 			x_re[q] = t;
-            t = x_im[p];
-            x_im[p] = x_im[q];
+	        t = x_im[p];
+	        x_im[p] = x_im[q];
 			x_im[q] = t;
-        }
-        */
-        k = m;
-        n = 0;
-        while(q >= (order[n]-1)*k & k > 0)
-        {
-            q = q-(order[n]-1)*k;
+	    }
+	        
+		k = m;
+	    n = 0;
+	    while(q >= (order[n]-1)*k & k > 0)
+	    {
+	        q = q-(order[n]-1)*k;
 			n++;
-            k /= order[n];
-            //printf("%d,%d\n",q,k);
-        }
-        q = q+k;
+	        k /= order[n];
+	        //printf("%d,%d\n",q,k);
+	    }
+	    q = q+k;
 		#if DEBUG
-   		printf("2.q=%d, k=%d\n",q,k);
-  		printf("========================\n");
+		printf("2.q=%d, k=%d\n",q,k);
+	  	printf("========================\n");
 		#endif  
 	}
-	
-	
-	return 0;
+
+return 0;
 }
