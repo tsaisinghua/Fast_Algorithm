@@ -6,7 +6,7 @@
 int main()
 {
 	int i, p, n = 0;
-	int N = 12;	
+	int N = 27;	
 	double x_re[N], x_im[N];
 		
 	for(i=0;i<N;++i)
@@ -69,7 +69,7 @@ int FFT(double *x_re, double *x_im, int N)
 //========================================================================
 int bit_reverse(double *x_re, double *x_im, int N, int *order)
 {
-    int m, t, p, q, i, k;
+    int m, t, p, q, i, k, change_index_p;
     int n = 0;
     int *change_index;
     int *cyclic;
@@ -82,12 +82,14 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
 	
 	q = m;
 	i = 2;
+	
 	//第一組 p, q 不動 
-		change_index[0] = 0;
-		change_index[1] = 0;
-		//最後一組 p, q 也不動 
-		change_index[2*N-2] = N-1;
-		change_index[2*N-1] = N-1;
+	change_index[0] = 0;
+	change_index[1] = 0;
+	//最後一組 p, q 也不動 
+	change_index[2*N-2] = N-1;
+	change_index[2*N-1] = N-1;
+	
 	for(p=1;p<N-1;p++)
    	{
    		
@@ -101,18 +103,7 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
 	    printf("p=%d, q=%d\n", change_index[10], change_index[11]);
 	    #endif
 	    i += 2;	  	
-	    		
-		/*	 
-	    if(p < q)
-	    {
-	        t = x_re[p];
-	        x_re[p] = x_re[q];
-			x_re[q] = t;
-	        t = x_im[p];
-	        x_im[p] = x_im[q];
-			x_im[q] = t;
-	    }
-	    */  
+	    
 		k = m;
 	    n = 0;
 	    while(q >= (order[n]-1)*k & k > 0)
@@ -129,24 +120,61 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
 		#endif  
 	}
 	
-	p = 1;
-	n = 0;
-	cyclic[0] = p;
-	//printf("p=%d, q=%d\n", change_index[10], change_index[11]);
-	while((change_index[2*p] != change_index[2*p+1]) && (change_index[2*p+1] != cyclic[0]))
+	
+	change_index_p = 0;
+	while(cyclic[0] != N-1)
 	{
-		cyclic[n] = change_index[2*p];
-		cyclic[n+1] = change_index[2*p+1];
-		p = change_index[2*p+1];
-		n++;
-	}
-	n++;
-	for(i=0;i<n;i++)
-	{
-		printf("cyclic[%d] = %d\n", i, cyclic[i]);	
+		change_index_p += 2;
+		p = change_index[change_index_p];	// p 的起始值 (在 change_index[2] 的位置) 
+		while(p == 0)
+		{
+			change_index_p += 2;
+			p = change_index[change_index_p];
+		}
+		n = 0;
+		cyclic[0] = p;
+	
+		
+		//printf("p=%d, q=%d\n", change_index[10], change_index[11]);
+		while((change_index[2*p] != change_index[2*p+1]) && (change_index[2*p+1] != cyclic[0]))
+		{
+			cyclic[n] = change_index[2*p];
+			cyclic[n+1] = change_index[2*p+1];
+			p = change_index[2*p+1];
+			n++;
+		}
+		n++;	
+		
+		for(i=0;i<n;i++)
+		{
+			printf("cyclic[%d] = %d\n", i, cyclic[i]);
+		}
+		
+		// x[p] 與 x[q] 互換，終止條件：下一個要換的，為一開始的 p, i.e. q = p (= cyclic[0])
+		// Ex. 1 -> 4 -> 6 ->1   	
+		// cyclic = [1 4 6]
+		// i=0, 1 <-> 4, i=1, 4 <-> 6
+		for(i=0;i<n-1;i++)
+		{	
+			t = x_re[cyclic[i]];
+		    x_re[cyclic[i]] = x_re[cyclic[i+1]];
+			x_re[cyclic[i+1]] = t;
+		    t = x_im[cyclic[i]];
+		    x_im[cyclic[i]] = x_im[cyclic[i+1]];
+			x_im[cyclic[i+1]] = t;
+			
+			change_index[2*cyclic[i]] = 0;			//將交換過的 index 歸零 
+			change_index[2*cyclic[i]+1] = 0;
+			change_index[2*cyclic[i+1]] = 0;
+			change_index[2*cyclic[i+1]+1] = 0;
+		}    
+		
+		for(i=0;i<2*N;i++)
+		{
+			printf("change_index[%d]=%d\n", i, change_index[i]);
+		}
 	}
 
-	
 	free(change_index);
 	free(cyclic);
 	return 0;
