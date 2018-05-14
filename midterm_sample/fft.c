@@ -80,6 +80,7 @@ int fft(double *x_r, double *x_i, double *y_r, double *y_i, int N)
         #if DEBUG
 		printf("original, N0 = %d\n",N0);
 		#endif         
+		printf("N0 = %d, order[%d] = %d, n = %d\n",N0,m,order[m],n);
 		butterfly(y_r, y_i, N, order[m],N0);
 		#if DEBUG
         printf("after butterfly function, N0 = %d\n",N0);

@@ -90,14 +90,10 @@ int butterfly(double *x_re, double *x_im, int N)
 		w_N_re =  cos(theta1);
 		w_N_im = -sin(theta1);
 		for(k=0;k<m;k++)
-		{	
-			/*
-			w_re = 1.0;
-			w_im = 0.0;
-			*/ 			
+		{	 			
 			theta = (2.0/3)*k*M_PI/m;		// 設定 w_re 及 w_im 的起始值 (m = 1, k = 0) => theta = 0; w_re = 1.0, w_im = 0.0 
             w_re =  cos(theta);				//							  (m = 3, k = 0) => theta = 0; w_re = 1.0, w_im = 0.0	
-            w_im = -sin(theta);				//							  (m = 3, k = 1) => theta = (2/9)*pi; w_re = cos((2/9)*pi), w_im = -sin((2/9)*pi)          
+            w_im = -sin(theta);				//							  (m = 3, k = 1) => theta = (2/9)*pi; w_re = cos((2/9)*pi), w_im = -sin((2/9)*pi)          	
 											//							  (m = 3, k = 2) => theta = (4/9)*pi; w_re = cos((4/9)*pi), w_im = -sin((4/9)*pi)  
 			for(p=k;p<N;p+=3*m)				
 			{

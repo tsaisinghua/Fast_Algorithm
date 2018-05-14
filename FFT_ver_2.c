@@ -3,7 +3,7 @@
 #include <omp.h>
 #include <math.h>
 #include <time.h>
-#define DEBUG 1
+#define DEBUG 0
 
 
 int main()
@@ -30,17 +30,17 @@ int main()
 	
 	t1 = clock();
 	bit_reverse(x_re, x_im, N);
-	butterfly(x_re, x_im, N);
+	butterfly_2(x_re, x_im, N);
 	t2 = clock();
 	T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
 	printf("FFT_ver2 of %d elements: %f\n",N, T1);
 	
-	#if DEBUG
+	//#if DEBUG
 	for(i=0;i<N;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
 	}
-	#endif
+	//#endif
 	return;
 	 
 }
@@ -101,16 +101,12 @@ int butterfly(double *x_re, double *x_im, int N)
 	int k, p, q, m;
 	double w_re, w_im, w_N_re, w_N_im, t, theta; 
 	//m = 1;
+
 	for(m=1;m<N;m*=2)
 	{
 		w_re = 1.0;
 		w_im = 0.0; 
 		theta = M_PI/m;		//找下一個 W_N 要加的角度	
-		#if DEBUG
-		printf("%f\n", theta);
-		#endif 
-		w_N_re =  cos(theta);
-		w_N_im = -sin(theta);
 		for(k=0;k<m;++k) 
 		{
 			for(p=k;p<N;p+=2*m)
@@ -141,6 +137,53 @@ int butterfly(double *x_re, double *x_im, int N)
 	
 	return;
 }
+
+//===========================================================================================
+
+int butterfly_2(double *x_re, double *x_im, int N)
+{
+	int k, p, q, m;
+	double w_re, w_im, w_N_re, w_N_im, t, theta; 
+	//m = 1;
+	for(m=1;m<N;m*=2)
+	{
+		for(k=0;k<m;++k) 
+		{
+			theta = k*M_PI/m;		//找下一個 W_N 要加的角度
+			w_re = cos(theta);
+			w_im = -sin(theta);
+			
+			for(p=k;p<N;p+=2*m)
+			{
+				q = p + m;
+				
+        		#if DEBUG
+				printf("(%d,%d) (%f,%f) FFT2 \n", p,q, w_re, w_im);
+				#endif
+				// multiply (w_re + w_im * i) on x[q]
+				t = x_re[q]; 
+				x_re[q] = w_re*x_re[q] - w_im*x_im[q];
+				x_im[q] = w_re*x_im[q] + w_im*t; 
+				
+				t = x_re[p];
+				x_re[p] = x_re[p] + x_re[q];
+				x_re[q] = t       - x_re[q]; 
+				t = x_im[p];
+				x_im[p] = x_im[p] + x_im[q];
+				x_im[q] = t       - x_im[q]; 
+			}
+		/*
+			t    = w_re; 
+			w_re = w_N_re*w_re - w_N_im*w_im;
+			w_im = w_N_re*w_im + w_N_im*t;
+		*/
+		}
+		//m = m * 2;
+	}	
+	return;
+}
+
+//===========================================================================================
 
 int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_im, int N)
 {

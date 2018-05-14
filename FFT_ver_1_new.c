@@ -21,7 +21,7 @@ int main()
 
 	N = (int)(pow(2, p) * pow(3, q) * pow(5, r));
 	*/
-	N = 9;
+	N = 12;
 	printf("N = %d\n",N);
 	
 	double y_re[N], y_im[N], x_re[N], x_im[N];
