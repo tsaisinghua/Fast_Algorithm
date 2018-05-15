@@ -13,7 +13,7 @@ int main()
 	double T1;
 	clock_t t1, t2;
 	
-	N = 27000000;	
+	N = 12;	
 	printf("N = %d\n",N);
 	x_re = (double *) malloc( N * sizeof(double));
 	x_im = (double *) malloc( N * sizeof(double));
@@ -49,22 +49,21 @@ int FFT(double *x_re, double *x_im, int N)
 	clock_t t1, t2;
 	N0 = N;
     p = 1;
+    
     order = (int *) malloc( N * sizeof(int));
+    
     while (N0>1)
 	{
-        if ((N0%5)==0) 
+        if ((N0%5)==0)
 		{
             p=5;            
-        }
-		else if ((N0%3)==0)
+        }else if ((N0%3)==0)
 		{
             p=3;            
-		}
-		else if ((N0%2)==0)
+		}else if ((N0%2)==0)
 		{
 			p=2;			
-		}
-		else
+		}else
 		{
             p=1;
         }
@@ -84,12 +83,7 @@ int FFT(double *x_re, double *x_im, int N)
 	}
 	#endif
 	
-	t1 = clock();
 	bit_reverse(x_re, x_im, N, order);
-	t2 = clock();
-	T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
-	printf("FFT_ver2 of %d elements: %f\n",N, T1);
-	
 	
 	i = 0;
 	
@@ -98,14 +92,9 @@ int FFT(double *x_re, double *x_im, int N)
 		#if DEBUG
 		printf("N0 = %d, order[%d] = %d\n", N0, i, order[i]);
 		#endif
-		
-		
-		t1 = clock();
-		butterfly(x_re, x_im, N, order[i], N0);
-		t2 = clock();
-		T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
-		printf("FFT_ver2 of %d elements: %f\n",N, T1);
 	
+		butterfly(x_re, x_im, N, order[i], N0);
+		
 		N0 *= order[i];
 		i++;
 	}
@@ -334,6 +323,7 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
 	}
 	
 	change_index_p = 0;
+	cyclic[0] = 1;
 	while(cyclic[0] != N-1)
 	{
 		change_index_p += 2;
