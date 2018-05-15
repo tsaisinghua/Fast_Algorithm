@@ -21,10 +21,16 @@ int main()
 
 	N = (int)(pow(2, p) * pow(3, q) * pow(5, r));
 	*/
-	N = 12;
+	N = pow(2, 3);
+	//N = 134217728;
 	printf("N = %d\n",N);
 	
-	double y_re[N], y_im[N], x_re[N], x_im[N];
+	double *y_re, *y_im, *x_re, *x_im;
+	y_re = (double *) malloc( N * sizeof(double));
+	y_im = (double *) malloc( N * sizeof(double));
+	x_re = (double *) malloc( N * sizeof(double));
+	x_im = (double *) malloc( N * sizeof(double));
+	
 	for(i=0;i<N;++i)
 	{
 		x_re[i] = i;
@@ -43,6 +49,11 @@ int main()
 		printf("%f + %f i\n", y_re[i], y_im[i]);
 	}
 	#endif
+	
+	free(y_re);
+	free(x_re);
+	free(y_im);
+	free(x_im);
 }
 
 int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_im, int N)
@@ -55,7 +66,7 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 		// y, y[0] = x[0]+x[1], y[1] = x[0] - x[1]
 		y_re[0] = x_re[0] + x_re[1];
 		y_im[0] = x_im[0] + x_im[1];
-		y_re[1] = x_re[0] - x_re[1]; 
+		y_re[1] = x_re[0] - x_re[1];
 		y_im[1] = x_im[0] - x_im[1];
 	}
 	else if(N>2 && (N%2)==0)

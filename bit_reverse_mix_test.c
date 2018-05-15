@@ -6,7 +6,7 @@
 int main()
 {
 	int i, p, n = 0;
-	int N = 12;	
+	int N =8;	
 	double x_re[N], x_im[N];
 		
 	for(i=0;i<N;++i)
@@ -50,7 +50,7 @@ int FFT(double *x_re, double *x_im, int N)
         }
 		order[n] = p;
 		N0 /= p;
-		printf("order[%d] = %d, N0 = %d\n",n, p, N0);		
+		printf("order[%d] = %d, N0 = %d\n",n, p, N0);	
 		n++;
 	}
 	n--;
@@ -64,6 +64,7 @@ int FFT(double *x_re, double *x_im, int N)
 	bit_reverse(x_re, x_im, N, order);
 	
 	i = 0;
+
 	while(N0<N && i<n)
 	{
 		//#if DEBUG
@@ -73,8 +74,159 @@ int FFT(double *x_re, double *x_im, int N)
 		N0 *= order[i];
 		i++;
 		printf("N0 = %d, i = %d, order[%d] = %d\n", N0, i, i, order[i]);
-	}	
+	}
+	
 	return 0;
+}
+
+//========================================================================================
+
+	//                order[0]=3(p=3)	 order[1]=2(p=2)   order[2]=2(p=2)
+	// N = 12, N0 = 12       ->    N0 = 4       ->    N0 = 2       ->    N0 = 1
+	// prime = 2 or 3 or 5
+int butterfly(double *x_re, double *x_im, int N, int prime, int N0)
+{
+	int k, p, q, r, s, t, m;
+	double theta, theta1;
+	double w_re, w_im, w_N_re, w_N_im;
+	double temp, t_rp, t_rq, t_rr, t_rs, t_rt;
+	double 	  t_ip, t_iq, t_ir, t_is, t_it;
+	N0 *= prime;
+	if(prime == 2)
+	{
+		for(k=0;k<N0/2;k++) 
+		{
+			theta = 2.0*k*M_PI/N0;	
+			w_re =  cos(theta);
+			w_im = -sin(theta);
+			
+			for(p=k;p<N;p+=N0)
+			{
+				q = p + N0/2;
+				
+				t = x_re[q];
+				x_re[q] = w_re*x_re[q] - w_im*x_im[q];
+				x_im[q] = w_re*x_im[q] + w_im*t;
+				
+				t = x_re[p];
+				x_re[p] = x_re[p] + x_re[q];
+				x_re[q] = t       - x_re[q];
+				t = x_im[p];
+				x_im[p] = x_im[p] + x_im[q];
+				x_im[q] = t       - x_im[q];
+			}
+		}
+	}
+	else if(prime == 3)
+	{
+		theta1 = 2.0*M_PI/3;				
+		w_N_re =  cos(theta1);
+		w_N_im = -sin(theta1);
+		for(k=0;k<N0/3;k++)
+		{	 			
+			theta = 2.0*k*M_PI/N0;	 
+            w_re =  cos(theta);				
+            w_im = -sin(theta);				       	
+											  
+			for(p=k;p<N;p+=N0)				
+			{
+				q = p + N0/3;
+				r = q + N0/3;
+				//printf("(%d,%d,%d) (%f,%f) FFT2 \n", p, q, r, w_re, w_im);
+				
+				// multiply (w_re + w_im * i) on x[q]
+				t_rq = x_re[q];
+				x_re[q] = w_re * x_re[q] - w_im * x_im[q];
+				x_im[q] = w_re * x_im[q] + w_im * t_rq;
+				// multiply (w_re + w_im * i)^2 = w_re - w_im * i on x[r]
+				t_rr = x_re[r];
+				x_re[r] = (w_re * w_re - w_im * w_im) * x_re[r] - (w_re * w_im + w_re * w_im)*x_im[r];
+				x_im[r] = (w_re * w_re - w_im * w_im) * x_im[r] + (w_re * w_im + w_re * w_im)*t_rr;
+				
+				t_rp = x_re[p];
+				t_rq = x_re[q];
+				t_rr = x_re[r];				
+				t_ip = x_im[p];
+				t_iq = x_im[q];	
+				t_ir = x_im[r];			
+				
+				x_re[r] = t_rp + w_N_re * (t_rq + t_rr) + w_N_im * (t_iq - t_ir);
+				x_re[q] = t_rp + w_N_re * (t_rq + t_rr) - w_N_im * (t_iq - t_ir); 
+				x_re[p] = t_rp + t_rq + t_rr;				
+				
+				x_im[r] = t_ip + w_N_re * (t_iq + t_ir) - w_N_im * (t_rq - t_rr);
+				x_im[q] = t_ip + w_N_re * (t_iq + t_ir) + w_N_im * (t_rq - t_rr);
+				x_im[p] = t_ip + t_iq + t_ir;	
+			}		
+		}
+	}
+	else if(prime == 5)
+	{
+		theta1 = 2.0*M_PI/5;
+		w_N_re =  cos(theta1);
+		w_N_im = -sin(theta1);
+		for(k=0;k<N0/5;k++)
+		{	
+			theta = 2.0*k*M_PI/N0;		
+            w_re =  cos(theta);				
+            w_im = -sin(theta);			
+			 
+			for(p=k;p<N;p+=N0)		
+			{
+				q = p + N0/5;
+				r = p + 2*N0/5;
+				s = p + 3*N0/5;
+				t = p + 4*N0/5;
+				//printf("(%d,%d,%d,%d,%d) (%f,%f) FFT2 \n", p, q, r, s, t, w_re, w_im);
+				 
+				// multiply (w_re + w_im * i) on x[q]
+				t_rq = x_re[q];
+				x_re[q] = w_re * x_re[q] - w_im * x_im[q];
+				x_im[q] = w_re * x_im[q] + w_im * t_rq;
+				// multiply (w_re + w_im * i)^2 = (w_re * w_re - w_im * w_im) + (w_re * w_im + w_re * w_im) * i on x[r]
+				t_rr = x_re[r];
+				x_re[r] = (w_re * w_re - w_im * w_im) * x_re[r] - (w_re * w_im + w_re * w_im)*x_im[r];
+				x_im[r] = (w_re * w_re - w_im * w_im) * x_im[r] + (w_re * w_im + w_re * w_im)*t_rr;
+				
+				t_rs = x_re[s];
+				x_re[s] = (w_re * w_re * w_re - 3 * w_re * w_im * w_im) * x_re[s] - (3 * w_re * w_re * w_im - w_im * w_im * w_im) * x_im[s];
+				x_im[s] = (w_re * w_re * w_re - 3 * w_re * w_im * w_im) * x_im[s] + (3 * w_re * w_re * w_im - w_im * w_im * w_im) * t_rs;
+				
+				t_rt = x_re[t];
+				x_re[t] = ((w_re * w_re - w_im * w_im)*(w_re * w_re - w_im * w_im) - (2 * w_re * w_im)*(2* w_re * w_im))*x_re[t] - 2*(w_re * w_re - w_im * w_im)*(2 * w_re * w_im)*x_im[t];
+				x_im[t] = ((w_re * w_re - w_im * w_im)*(w_re * w_re - w_im * w_im) - (2 * w_re * w_im)*(2* w_re * w_im))*x_im[t] + 2*(w_re * w_re - w_im * w_im)*(2 * w_re * w_im)*t_rt;
+							
+				t_rp = x_re[p];
+				t_rq = x_re[q];
+				t_rr = x_re[r];
+				t_rs = x_re[s];
+				t_rt = x_re[t];		
+						
+				t_ip = x_im[p];
+				t_iq = x_im[q];	
+				t_ir = x_im[r];	
+				t_is = x_im[s];	
+				t_it = x_im[t];			
+									
+				x_re[p] = t_rp + t_rq + t_rr + t_rs + t_rt;				
+				x_re[q] = t_rp + w_N_re * (t_rq + t_rt) - w_N_im * (t_iq - t_it) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_rr + t_rs) - (2 * w_N_re * w_N_im) * (t_ir - t_is);
+				x_re[r] = t_rp + w_N_re * (t_rr + t_rs) - w_N_im * (t_is - t_ir) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_rq + t_rt) - (2 * w_N_re * w_N_im) * (t_iq - t_it);
+				x_re[s] = t_rp + w_N_re * (t_rr + t_rs) - w_N_im * (t_ir - t_is) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_rt + t_rq) - (2 * w_N_re * w_N_im) * (t_it - t_iq);
+				x_re[t] = t_rp + w_N_re * (t_rq + t_rt) - w_N_im * (t_it - t_iq) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_rs + t_rr) - (2 * w_N_re * w_N_im) * (t_is - t_ir);
+				
+				x_im[p] = t_ip + t_iq + t_ir + t_is + t_it;
+				x_im[q] = t_ip + w_N_re * (t_iq + t_it) + w_N_im * (t_rq - t_rt) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_ir + t_is) + (2 * w_N_re * w_N_im) * (t_rr - t_rs);
+				x_im[r] = t_ip + w_N_re * (t_ir + t_is) + w_N_im * (t_rs - t_rr) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_iq + t_it) + (2 * w_N_re * w_N_im) * (t_rq - t_rt);		
+				x_im[s] = t_ip + w_N_re * (t_ir + t_is) + w_N_im * (t_rr - t_rs) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_it + t_iq) + (2 * w_N_re * w_N_im) * (t_rt - t_rq);
+				x_im[t] = t_ip + w_N_re * (t_iq + t_it) + w_N_im * (t_rt - t_rq) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_is + t_ir) + (2 * w_N_re * w_N_im) * (t_rs - t_rr);		
+			}
+		}
+	}
+	else
+	{
+		printf("we didn't do this! p = 1; N = %d\n", N);
+	}
+	return 0;	
 }
 
 //========================================================================================
@@ -195,156 +347,7 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
 	return 0;
 }
 
-//========================================================================================
 
-	//                order[0]=3(p=3)	 order[1]=2(p=2)   order[2]=2(p=2)
-	// N = 12, N0 = 12       ->    N0 = 4       ->    N0 = 2       ->    N0 = 1
-	// prime = 2 or 3 or 5
-int butterfly(double *x_re, double *x_im, int N, int prime, int N0)
-{
-	int k, p, q, r, s, t, m;
-	double theta, theta1;
-	double w_re, w_im, w_N_re, w_N_im;
-	double temp, t_rp, t_rq, t_rr, t_rs, t_rt;
-	double 	  t_ip, t_iq, t_ir, t_is, t_it;
-	N0 = N0*prime;
-	switch(prime)
-	{
-		case 2:
-			//for(m=1;m<N;m*=2)
-			{	
-				for(k=0;k<N0/2;k++) 
-				{
-					theta = 2.0*k*M_PI/N0;		//找下一個 W_N 要加的角度
-					w_re =  cos(theta);
-					w_im = -sin(theta);
-					
-					for(p=k;p<N;p+=N0)
-					{
-						q = p + N0/2;
-						
-						t = x_re[q];
-						x_re[q] = w_re*x_re[q] - w_im*x_im[q];
-						x_im[q] = w_re*x_im[q] + w_im*t; 
-						
-						t = x_re[p];
-						x_re[p] = x_re[p] + x_re[q];
-						x_re[q] = t       - x_re[q]; 
-						t = x_im[p];
-						x_im[p] = x_im[p] + x_im[q];
-						x_im[q] = t       - x_im[q]; 
-					}
-				}
-			}
-			break;
-		
-		case 3:
-			theta1 = 2.0*M_PI/3;				
-			w_N_re =  cos(theta1);
-			w_N_im = -sin(theta1);
-			for(k=0;k<N0/3;k++)
-			{	 			
-				theta = 2.0*k*M_PI/N0;	 
-	            w_re =  cos(theta);				
-	            w_im = -sin(theta);				       	
-												  
-				for(p=k;p<N;p+=N0)				
-				{
-					q = p + N0/3;
-					r = q + N0/3;
-					//printf("(%d,%d,%d) (%f,%f) FFT2 \n", p, q, r, w_re, w_im);
-					
-					// multiply (w_re + w_im * i) on x[q]
-					t_rq = x_re[q];
-					x_re[q] = w_re * x_re[q] - w_im * x_im[q];
-					x_im[q] = w_re * x_im[q] + w_im * t_rq;
-					// multiply (w_re + w_im * i)^2 = w_re - w_im * i on x[r]
-					t_rr = x_re[r];
-					x_re[r] = (w_re * w_re - w_im * w_im) * x_re[r] - (w_re * w_im + w_re * w_im)*x_im[r];
-					x_im[r] = (w_re * w_re - w_im * w_im) * x_im[r] + (w_re * w_im + w_re * w_im)*t_rr;
-					
-					t_rp = x_re[p];
-					t_rq = x_re[q];
-					t_rr = x_re[r];				
-					t_ip = x_im[p];
-					t_iq = x_im[q];	
-					t_ir = x_im[r];			
-					
-					x_re[r] = t_rp + w_N_re * (t_rq + t_rr) + w_N_im * (t_iq - t_ir);
-					x_re[q] = t_rp + w_N_re * (t_rq + t_rr) - w_N_im * (t_iq - t_ir); 
-					x_re[p] = t_rp + t_rq + t_rr;				
-					
-					x_im[r] = t_ip + w_N_re * (t_iq + t_ir) - w_N_im * (t_rq - t_rr);
-					x_im[q] = t_ip + w_N_re * (t_iq + t_ir) + w_N_im * (t_rq - t_rr);
-					x_im[p] = t_ip + t_iq + t_ir;	
-				}		
-			}
-			break;
-			
-		case 5:
-			theta1 = 2.0*M_PI/5;
-			w_N_re =  cos(theta1);
-			w_N_im = -sin(theta1);
-			for(k=0;k<N0/5;k++)
-			{	
-				theta = 2.0*k*M_PI/N0;		
-	            w_re =  cos(theta);				
-	            w_im = -sin(theta);			
-				 
-				for(p=k;p<N;p+=N0)		
-				{
-					q = p + N0/5;
-					r = p + 2*N0/5;
-					s = p + 3*N0/5;
-					t = p + 4*N0/5;
-					//printf("(%d,%d,%d,%d,%d) (%f,%f) FFT2 \n", p, q, r, s, t, w_re, w_im);
-					 
-					// multiply (w_re + w_im * i) on x[q]
-					t_rq = x_re[q];
-					x_re[q] = w_re * x_re[q] - w_im * x_im[q];
-					x_im[q] = w_re * x_im[q] + w_im * t_rq;
-					// multiply (w_re + w_im * i)^2 = (w_re * w_re - w_im * w_im) + (w_re * w_im + w_re * w_im) * i on x[r]
-					t_rr = x_re[r];
-					x_re[r] = (w_re * w_re - w_im * w_im) * x_re[r] - (w_re * w_im + w_re * w_im)*x_im[r];
-					x_im[r] = (w_re * w_re - w_im * w_im) * x_im[r] + (w_re * w_im + w_re * w_im)*t_rr;
-					
-					t_rs = x_re[s];
-					x_re[s] = (w_re * w_re * w_re - 3 * w_re * w_im * w_im) * x_re[s] - (3 * w_re * w_re * w_im - w_im * w_im * w_im) * x_im[s];
-					x_im[s] = (w_re * w_re * w_re - 3 * w_re * w_im * w_im) * x_im[s] + (3 * w_re * w_re * w_im - w_im * w_im * w_im) * t_rs;
-					
-					t_rt = x_re[t];
-					x_re[t] = ((w_re * w_re - w_im * w_im)*(w_re * w_re - w_im * w_im) - (2 * w_re * w_im)*(2* w_re * w_im))*x_re[t] - 2*(w_re * w_re - w_im * w_im)*(2 * w_re * w_im)*x_im[t];
-					x_im[t] = ((w_re * w_re - w_im * w_im)*(w_re * w_re - w_im * w_im) - (2 * w_re * w_im)*(2* w_re * w_im))*x_im[t] + 2*(w_re * w_re - w_im * w_im)*(2 * w_re * w_im)*t_rt;
-								
-					t_rp = x_re[p];
-					t_rq = x_re[q];
-					t_rr = x_re[r];
-					t_rs = x_re[s];
-					t_rt = x_re[t];		
-							
-					t_ip = x_im[p];
-					t_iq = x_im[q];	
-					t_ir = x_im[r];	
-					t_is = x_im[s];	
-					t_it = x_im[t];			
-										
-					x_re[p] = t_rp + t_rq + t_rr + t_rs + t_rt;				
-					x_re[q] = t_rp + w_N_re * (t_rq + t_rt) - w_N_im * (t_iq - t_it) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_rr + t_rs) - (2 * w_N_re * w_N_im) * (t_ir - t_is);
-					x_re[r] = t_rp + w_N_re * (t_rr + t_rs) - w_N_im * (t_is - t_ir) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_rq + t_rt) - (2 * w_N_re * w_N_im) * (t_iq - t_it);
-					x_re[s] = t_rp + w_N_re * (t_rr + t_rs) - w_N_im * (t_ir - t_is) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_rt + t_rq) - (2 * w_N_re * w_N_im) * (t_it - t_iq);
-					x_re[t] = t_rp + w_N_re * (t_rq + t_rt) - w_N_im * (t_it - t_iq) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_rs + t_rr) - (2 * w_N_re * w_N_im) * (t_is - t_ir);
-					
-					x_im[p] = t_ip + t_iq + t_ir + t_is + t_it;
-					x_im[q] = t_ip + w_N_re * (t_iq + t_it) + w_N_im * (t_rq - t_rt) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_ir + t_is) + (2 * w_N_re * w_N_im) * (t_rr - t_rs);
-					x_im[r] = t_ip + w_N_re * (t_ir + t_is) + w_N_im * (t_rs - t_rr) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_iq + t_it) + (2 * w_N_re * w_N_im) * (t_rq - t_rt);		
-					x_im[s] = t_ip + w_N_re * (t_ir + t_is) + w_N_im * (t_rr - t_rs) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_it + t_iq) + (2 * w_N_re * w_N_im) * (t_rt - t_rq);
-					x_im[t] = t_ip + w_N_re * (t_iq + t_it) + w_N_im * (t_rt - t_rq) + (w_N_re * w_N_re - w_N_im * w_N_im) * (t_is + t_ir) + (2 * w_N_re * w_N_im) * (t_rs - t_rr);		
-				}
-			}
-			break;
-	}
-	return 0;	
-}
 
 
 
