@@ -3,7 +3,7 @@
 #include <omp.h>
 #include <math.h>
 #include <time.h>
-#define DEBUG 1
+#define DEBUG 0
 int main()
 {
 	int i, p, q, r, N;
@@ -21,7 +21,7 @@ int main()
 
 	N = (int)(pow(2, p) * pow(3, q) * pow(5, r));
 	*/
-	N = pow(2, 3);
+	N = 27000000;
 	//N = 134217728;
 	printf("N = %d\n",N);
 	

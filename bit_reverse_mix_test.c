@@ -1,24 +1,41 @@
 #include <stdio.h>
 #include <stdlib.h> 
+#include <omp.h>
 #include <math.h>
+#include <time.h>
 #define DEBUG 0
 
 int main()
 {
 	int i, p, n = 0;
-	int N =8;	
-	double x_re[N], x_im[N];
-		
+	int N ;	
+	double *x_re, *x_im;
+	double T1;
+	clock_t t1, t2;
+	
+	N = 27000000;	
+	printf("N = %d\n",N);
+	x_re = (double *) malloc( N * sizeof(double));
+	x_im = (double *) malloc( N * sizeof(double));
 	for(i=0;i<N;++i)
 	{
 		x_re[i] = i;
 		x_im[i] = 0.0;
 	}
+	
+	t1 = clock();
 	FFT(x_re, x_im, N);
+	t2 = clock();
+	T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
+	printf("FFT_ver2 of %d elements: %f\n",N, T1);
+	#if DEBUG 	
 	for(i=0;i<N;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
 	} 
+	#endif
+	free(x_re);
+	free(x_im);
 	return;
 }
 
@@ -27,9 +44,12 @@ int main()
 int FFT(double *x_re, double *x_im, int N)
 {	
 	int N0, i, p, n = 0;
-	int order[N];
+	int *order;
+	double T1;
+	clock_t t1, t2;
 	N0 = N;
     p = 1;
+    order = (int *) malloc( N * sizeof(int));
     while (N0>1)
 	{
         if ((N0%5)==0) 
@@ -50,7 +70,9 @@ int FFT(double *x_re, double *x_im, int N)
         }
 		order[n] = p;
 		N0 /= p;
+		#if DEBUG 
 		printf("order[%d] = %d, N0 = %d\n",n, p, N0);	
+		#endif
 		n++;
 	}
 	n--;
@@ -61,61 +83,77 @@ int FFT(double *x_re, double *x_im, int N)
 		printf("order[%d] = %d\n", i, order[i]);
 	}
 	#endif
+	
+	t1 = clock();
 	bit_reverse(x_re, x_im, N, order);
+	t2 = clock();
+	T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
+	printf("FFT_ver2 of %d elements: %f\n",N, T1);
+	
 	
 	i = 0;
-
-	while(N0<N && i<n)
+	
+	while(N0<N && i<=n)
 	{
-		//#if DEBUG
+		#if DEBUG
 		printf("N0 = %d, order[%d] = %d\n", N0, i, order[i]);
-		//#endif
+		#endif
+		
+		
+		t1 = clock();
 		butterfly(x_re, x_im, N, order[i], N0);
+		t2 = clock();
+		T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
+		printf("FFT_ver2 of %d elements: %f\n",N, T1);
+	
 		N0 *= order[i];
 		i++;
-		printf("N0 = %d, i = %d, order[%d] = %d\n", N0, i, i, order[i]);
 	}
-	
+	free(order);
 	return 0;
 }
 
-//========================================================================================
+//=============================================================================================================================
 
 	//                order[0]=3(p=3)	 order[1]=2(p=2)   order[2]=2(p=2)
 	// N = 12, N0 = 12       ->    N0 = 4       ->    N0 = 2       ->    N0 = 1
 	// prime = 2 or 3 or 5
+
 int butterfly(double *x_re, double *x_im, int N, int prime, int N0)
 {
 	int k, p, q, r, s, t, m;
-	double theta, theta1;
-	double w_re, w_im, w_N_re, w_N_im;
-	double temp, t_rp, t_rq, t_rr, t_rs, t_rt;
-	double 	  t_ip, t_iq, t_ir, t_is, t_it;
+	double w_re, w_im, w_N_re, w_N_im, w_2_re, w_2_im, w_3_re, w_3_im, w_4_re, w_4_im, theta, theta1; 
+	double t_rp, t_rq, t_rr, t_rs, t_rt, t_ip, t_iq, t_ir, t_is, t_it;		
 	N0 *= prime;
+	
 	if(prime == 2)
 	{
 		for(k=0;k<N0/2;k++) 
 		{
-			theta = 2.0*k*M_PI/N0;	
-			w_re =  cos(theta);
+			theta = 2.0*k*M_PI/N0;		//找下一個 W_N 要加的角度
+			w_re = cos(theta);
 			w_im = -sin(theta);
 			
 			for(p=k;p<N;p+=N0)
 			{
 				q = p + N0/2;
 				
-				t = x_re[q];
+        		#if DEBUG
+				printf("(%d,%d) (%f,%f) FFT2 \n", p,q, w_re, w_im);
+				#endif
+				// multiply (w_re + w_im * i) on x[q]
+				t_rq = x_re[q]; 
 				x_re[q] = w_re*x_re[q] - w_im*x_im[q];
-				x_im[q] = w_re*x_im[q] + w_im*t;
+				x_im[q] = w_re*x_im[q] + w_im*t_rq; 
 				
-				t = x_re[p];
+				t_rp = x_re[p];
 				x_re[p] = x_re[p] + x_re[q];
-				x_re[q] = t       - x_re[q];
-				t = x_im[p];
+				x_re[q] = t_rp    - x_re[q]; 
+				t_ip = x_im[p];
 				x_im[p] = x_im[p] + x_im[q];
-				x_im[q] = t       - x_im[q];
+				x_im[q] = t_ip    - x_im[q]; 
 			}
-		}
+		}	
 	}
 	else if(prime == 3)
 	{
@@ -132,7 +170,9 @@ int butterfly(double *x_re, double *x_im, int N, int prime, int N0)
 			{
 				q = p + N0/3;
 				r = q + N0/3;
-				//printf("(%d,%d,%d) (%f,%f) FFT2 \n", p, q, r, w_re, w_im);
+				
+				w_2_re = w_re * w_re - w_im * w_im;
+				w_2_im = w_re * w_im + w_re * w_im;	
 				
 				// multiply (w_re + w_im * i) on x[q]
 				t_rq = x_re[q];
@@ -140,12 +180,13 @@ int butterfly(double *x_re, double *x_im, int N, int prime, int N0)
 				x_im[q] = w_re * x_im[q] + w_im * t_rq;
 				// multiply (w_re + w_im * i)^2 = w_re - w_im * i on x[r]
 				t_rr = x_re[r];
-				x_re[r] = (w_re * w_re - w_im * w_im) * x_re[r] - (w_re * w_im + w_re * w_im)*x_im[r];
-				x_im[r] = (w_re * w_re - w_im * w_im) * x_im[r] + (w_re * w_im + w_re * w_im)*t_rr;
+				x_re[r] = w_2_re * x_re[r] - w_2_im*x_im[r];
+				x_im[r] = w_2_re * x_im[r] + w_2_im*t_rr;
 				
 				t_rp = x_re[p];
 				t_rq = x_re[q];
-				t_rr = x_re[r];				
+				t_rr = x_re[r];		
+						
 				t_ip = x_im[p];
 				t_iq = x_im[q];	
 				t_ir = x_im[r];			
@@ -177,24 +218,32 @@ int butterfly(double *x_re, double *x_im, int N, int prime, int N0)
 				r = p + 2*N0/5;
 				s = p + 3*N0/5;
 				t = p + 4*N0/5;
-				//printf("(%d,%d,%d,%d,%d) (%f,%f) FFT2 \n", p, q, r, s, t, w_re, w_im);
-				 
+				
+				w_2_re = w_re * w_re - w_im * w_im;
+				w_2_im = w_re * w_im + w_re * w_im;
+				
+				w_3_re = w_re * w_re * w_re - 3 * w_re * w_im * w_im;
+				w_3_im = 3 * w_re * w_re * w_im - w_im * w_im * w_im;
+				
+				w_4_re = w_2_re * w_2_re - w_2_im * w_2_im;
+				w_4_im = 2 * w_2_re * w_2_im;			
+				
 				// multiply (w_re + w_im * i) on x[q]
 				t_rq = x_re[q];
 				x_re[q] = w_re * x_re[q] - w_im * x_im[q];
 				x_im[q] = w_re * x_im[q] + w_im * t_rq;
 				// multiply (w_re + w_im * i)^2 = (w_re * w_re - w_im * w_im) + (w_re * w_im + w_re * w_im) * i on x[r]
 				t_rr = x_re[r];
-				x_re[r] = (w_re * w_re - w_im * w_im) * x_re[r] - (w_re * w_im + w_re * w_im)*x_im[r];
-				x_im[r] = (w_re * w_re - w_im * w_im) * x_im[r] + (w_re * w_im + w_re * w_im)*t_rr;
+				x_re[r] = w_2_re * x_re[r] - w_2_im * x_im[r];
+				x_im[r] = w_2_re * x_im[r] + w_2_im * t_rr;
 				
 				t_rs = x_re[s];
-				x_re[s] = (w_re * w_re * w_re - 3 * w_re * w_im * w_im) * x_re[s] - (3 * w_re * w_re * w_im - w_im * w_im * w_im) * x_im[s];
-				x_im[s] = (w_re * w_re * w_re - 3 * w_re * w_im * w_im) * x_im[s] + (3 * w_re * w_re * w_im - w_im * w_im * w_im) * t_rs;
+				x_re[s] = w_3_re * x_re[s] - w_3_im * x_im[s];
+				x_im[s] = w_3_re * x_im[s] + w_3_im * t_rs;
 				
 				t_rt = x_re[t];
-				x_re[t] = ((w_re * w_re - w_im * w_im)*(w_re * w_re - w_im * w_im) - (2 * w_re * w_im)*(2* w_re * w_im))*x_re[t] - 2*(w_re * w_re - w_im * w_im)*(2 * w_re * w_im)*x_im[t];
-				x_im[t] = ((w_re * w_re - w_im * w_im)*(w_re * w_re - w_im * w_im) - (2 * w_re * w_im)*(2* w_re * w_im))*x_im[t] + 2*(w_re * w_re - w_im * w_im)*(2 * w_re * w_im)*t_rt;
+				x_re[t] = w_4_re * x_re[t] - w_4_im * x_im[t];
+				x_im[t] = w_4_re * x_im[t] + w_4_im * t_rt;
 							
 				t_rp = x_re[p];
 				t_rq = x_re[q];
@@ -226,7 +275,7 @@ int butterfly(double *x_re, double *x_im, int N, int prime, int N0)
 	{
 		printf("we didn't do this! p = 1; N = %d\n", N);
 	}
-	return 0;	
+	return;
 }
 
 //========================================================================================
@@ -297,7 +346,6 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
 		n = 0;
 		cyclic[0] = p;
 	
-		
 		//printf("p=%d, q=%d\n", change_index[10], change_index[11]);
 		while((change_index[2*p] != change_index[2*p+1]) && (change_index[2*p+1] != cyclic[0]))
 		{
@@ -332,8 +380,8 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
 			change_index[2*cyclic[i]+1] = 0;
 			change_index[2*cyclic[i+1]] = 0;
 			change_index[2*cyclic[i+1]+1] = 0;
-		}    
-		
+		}
+				
 		#if DEBUG
 		for(i=0;i<2*N;i++)
 		{
@@ -341,12 +389,10 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
 		}
 		#endif
 	}
-
 	free(change_index);
 	free(cyclic);
 	return 0;
 }
-
 
 
 

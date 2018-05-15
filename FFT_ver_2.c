@@ -128,7 +128,7 @@ int butterfly(double *x_re, double *x_im, int N)
 				x_im[p] = x_im[p] + x_im[q];
 				x_im[q] = t       - x_im[q]; 
 			}
-			t    = w_re; 
+			t    = w_re;
 			w_re = w_N_re*w_re - w_N_im*w_im;
 			w_im = w_N_re*w_im + w_N_im*t;
 		}
