@@ -17,9 +17,11 @@ int main()
 	// N = 14348907;
 	// N = 134217728;
 	// N = 33554432;
+	// N = 24300000;
+	// N = 1200000;
 	// N = 27000000;
 	// N = 134217728;
-	N = 36;
+	 N = 2*2*2*2*5*3*3*3*3*5*5*5;
 	printf("N = %d\n",N);
 	
 	double *y_re, *y_im, *x_re, *x_im;
@@ -41,7 +43,7 @@ int main()
 	printf("FFT_ver1 of %d elements: %f\n",N, T1);
 		
 	//#if DEBUG
-	for(i=0;i<N;++i)
+	for(i=0;i<500;++i)
 	{
 		printf("%f + %f i\n", y_re[i], y_im[i]);
 	}
@@ -59,7 +61,7 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 	double theta, theta1;
 	double w_re, w_im, w_N_re, w_N_im, w_2_re, w_2_im, w_N_2_re, w_N_2_im; 
 	double w_3_re, w_3_im, w_4_re, w_4_im, t_rq, t_rr, t_rs, t_rt, temp, a, b;
-	double u1_r, u1_i, u2_r, u2_i;
+	double u1_r, u1_i, u2_r, u2_i, u3_r, u3_i, u4_r, u4_i;
 	int k;
 	//double t_r1, t_r2;
 	
@@ -124,69 +126,6 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 	}
 	else if(N>3 && (N%3)==0)
 	{
-		/*
-		double *y_30_re, *y_30_im, *y_31_re, *y_31_im, *y_32_re, *y_32_im;
-		double *x_30_re, *x_30_im, *x_31_re, *x_31_im, *x_32_re, *x_32_im;
-		double w_re, w_im, w_N_re, w_N_im, w_2_re, w_2_im, t_rq, t_rr, temp, theta;
-		y_30_re = (double *) malloc( N/3 * sizeof(double));
-		y_30_im = (double *) malloc( N/3 * sizeof(double));
-		x_30_re = (double *) malloc( N/3 * sizeof(double));
-		x_30_im = (double *) malloc( N/3 * sizeof(double));
-		y_31_re = (double *) malloc( N/3 * sizeof(double));
-		y_31_im = (double *) malloc( N/3 * sizeof(double));
-		x_31_re = (double *) malloc( N/3 * sizeof(double));
-		x_31_im = (double *) malloc( N/3 * sizeof(double));
-		y_32_re = (double *) malloc( N/3 * sizeof(double));
-		y_32_im = (double *) malloc( N/3 * sizeof(double));
-		x_32_re = (double *) malloc( N/3 * sizeof(double));
-		x_32_im = (double *) malloc( N/3 * sizeof(double));
-		for(k=0;k<N/3;++k)
-		{
-			x_30_re[k] = x_re[3*k];
-			x_30_im[k] = x_im[3*k];
-			x_31_re[k] = x_re[3*k+1];
-			x_31_im[k] = x_im[3*k+1];
-			x_32_re[k] = x_re[3*k+2];
-			x_32_im[k] = x_im[3*k+2];
-		}
-		Fast_Fourier_Transform(y_30_re, y_30_im, x_30_re, x_30_im, N/3);
-		Fast_Fourier_Transform(y_31_re, y_31_im, x_31_re, x_31_im, N/3);
-		Fast_Fourier_Transform(y_32_re, y_32_im, x_32_re, x_32_im, N/3);
-		// y_k = even_k + w_N^k odd_k = even_k + (a + bi)
-		w_N_re =  cos(2.0*M_PI/3);
-		w_N_im = -sin(2.0*M_PI/3);
-		
-		for(k=0;k<N/3;++k)
-		{
-			theta = 2.0*k*M_PI/N;
-			w_re  =  cos(theta);
-			w_im  = -sin(theta);
-			
-			w_2_re = w_re * w_re - w_im * w_im;
-			w_2_im = w_re * w_im + w_re * w_im;
-			// multiply (w_re + w_im * i) on x[q]
-			t_rq = y_31_re[k];
-			y_31_re[k] = w_re * y_31_re[k] - w_im * y_31_im[k];
-			y_31_im[k] = w_re * y_31_im[k] + w_im * t_rq;
-			// multiply (w_re + w_im * i)^2 = w_re - w_im * i on x[r]
-			t_rr = y_32_re[k];
-			y_32_re[k] = w_2_re * y_32_re[k] - w_2_im * y_32_im[k];
-			y_32_im[k] = w_2_re * y_32_im[k] + w_2_im * t_rr;
-				
-				
-			y_re[k] 	  = y_30_re[k] + y_31_re[k] + y_32_re[k];
-			y_im[k] 	  = y_30_im[k] + y_31_im[k] + y_32_im[k]; 
-			y_re[N/3+k]   = y_30_re[k] + w_N_re * (y_31_re[k] +  y_32_re[k]) - w_N_im * (y_31_im[k] - y_32_im[k]);
-			y_im[N/3+k]   = y_30_im[k] + w_N_re * (y_31_im[k] +  y_32_im[k]) + w_N_im * (y_31_re[k] - y_32_re[k]);
-			y_re[2*N/3+k] = y_30_re[k] + w_N_re * (y_31_re[k] +  y_32_re[k]) + w_N_im * (y_31_im[k] - y_32_im[k]);
-			y_im[2*N/3+k] = y_30_im[k] + w_N_re * (y_31_im[k] +  y_32_im[k]) - w_N_im * (y_31_re[k] - y_32_re[k]);
-					
-		}
-		free(y_30_re);free(y_30_im);free(x_30_re);
-		free(x_30_im);free(y_31_re);free(y_31_im);
-		free(x_31_re);free(x_31_im);free(y_32_re);
-		free(y_32_im);free(x_32_re);free(x_32_im);
-	*/
 		double *z_r, *z_i, *u_r, *u_i;
 		z_r = (double *) malloc(N*sizeof(double)); // z_r:0~N/2-1: even, z_r:N/2~N-1: odd
 		z_i = (double *) malloc(N*sizeof(double)); // z_i:0~N/2-1: even, z_i:N/2~N-1: odd 
@@ -205,17 +144,24 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 		Fast_Fourier_Transform(u_r, u_i, z_r, z_i, N/3);
 		Fast_Fourier_Transform(u_r+N/3, u_i+N/3, z_r+N/3, z_i+N/3, N/3);
 		Fast_Fourier_Transform(u_r+2*N/3, u_i+2*N/3, z_r+2*N/3, z_i+2*N/3, N/3);
-		w_N_re =  cos(2.0*M_PI/N);
-		w_N_im = -sin(2.0*M_PI/N);
-		w_re   = 1.0;
-		w_im   = 0.0; 
+		
+		w_N_re =  cos(2.0*M_PI/3);
+		w_N_im = -sin(2.0*M_PI/3);
+		
+		
 		for(k=0;k<N/3;++k)
 		{
+			theta = 2.0*k*M_PI/N;
+			w_re  =  cos(theta);
+			w_im  = -sin(theta);
+			w_2_re = w_re * w_re - w_im * w_im;
+			w_2_im = w_re * w_im + w_re * w_im;
+					
 			u1_r = w_re*u_r[N/3+k] - w_im*u_i[N/3+k];
 			u1_i = w_re*u_i[N/3+k] + w_im*u_r[N/3+k];
 			// (w_re + i w_im)^2 = w_re*w_re - w_im*w_im + i (2*w_re*w_im)
-			u2_r = (w_re*w_re - w_im*w_im)*u_r[2*N/3+k] - (2*w_re*w_im)*u_i[2*N/3+k];
-			u2_i = (w_re*w_re - w_im*w_im)*u_i[2*N/3+k] + (2*w_re*w_im)*u_r[2*N/3+k];
+			u2_r = w_2_re*u_r[2*N/3+k] - w_2_im*u_i[2*N/3+k];
+			u2_i = w_2_re*u_i[2*N/3+k] + w_2_im*u_r[2*N/3+k];
 			a = -0.5; b = -sqrt(3)/2;
 			y_re[k]       = u_r[k] + u1_r + u2_r;
 			y_im[k]       = u_i[k] + u1_i + u2_i;
@@ -223,9 +169,11 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 			y_im[N/3+k]   = u_i[k] + (u1_i*a+u1_r*b) + (u2_i*a-u2_r*b);
 			y_re[2*N/3+k] = u_r[k] + (u1_r*a+u1_i*b) + (u2_r*a-u2_i*b);
 			y_im[2*N/3+k] = u_i[k] + (u1_i*a-u1_r*b) + (u2_i*a+u2_r*b);
+			/* 
 			temp = w_re;
 			w_re = w_re*w_N_re - w_im*w_N_im;
 			w_im = temp*w_N_im + w_im*w_N_re;
+			*/ 
 		}
 		free(u_r); free(u_i); free(z_r); free(z_i);
 
@@ -233,6 +181,7 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 	}
 	else if(N == 5) 
 	{
+		
 		double w_N_2_re, w_N_2_im;
 		theta1 = 2.0*M_PI/5;
 		w_N_re =  cos(theta1);
@@ -263,49 +212,30 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 	}
 	else if(N>5 && (N%5)==0)
 	{
-		double *y_50_re, *y_50_im, *y_51_re, *y_51_im, *y_52_re, *y_52_im, *y_53_re, *y_53_im, *y_54_re, *y_54_im;
-		double *x_50_re, *x_50_im, *x_51_re, *x_51_im, *x_52_re, *x_52_im, *x_53_re, *x_53_im, *x_54_re, *x_54_im;
-		double w_re, w_im, w_N_re, w_N_im, w_2_re, w_2_im, w_N_2_re, w_N_2_im, w_3_re, w_3_im, w_4_re, w_4_im, t_rq, t_rr, t_rs, t_rt, temp, theta;
-		y_50_re = (double *) malloc( N/5 * sizeof(double));
-		y_50_im = (double *) malloc( N/5 * sizeof(double));
-		x_50_re = (double *) malloc( N/5 * sizeof(double));
-		x_50_im = (double *) malloc( N/5 * sizeof(double));
-		y_51_re = (double *) malloc( N/5 * sizeof(double));
-		y_51_im = (double *) malloc( N/5 * sizeof(double));
-		x_51_re = (double *) malloc( N/5 * sizeof(double));
-		x_51_im = (double *) malloc( N/5 * sizeof(double));
-		y_52_re = (double *) malloc( N/5 * sizeof(double));
-		y_52_im = (double *) malloc( N/5 * sizeof(double));
-		x_52_re = (double *) malloc( N/5 * sizeof(double));
-		x_52_im = (double *) malloc( N/5 * sizeof(double));
-		y_53_re = (double *) malloc( N/5 * sizeof(double));
-		y_53_im = (double *) malloc( N/5 * sizeof(double));
-		x_53_re = (double *) malloc( N/5 * sizeof(double));
-		x_53_im = (double *) malloc( N/5 * sizeof(double));
-		y_54_re = (double *) malloc( N/5 * sizeof(double));
-		y_54_im = (double *) malloc( N/5 * sizeof(double));
-		x_54_re = (double *) malloc( N/5 * sizeof(double));
-		x_54_im = (double *) malloc( N/5 * sizeof(double));
+		double *z_r, *z_i, *u_r, *u_i;
+		z_r = (double *) malloc(N*sizeof(double)); // z_r:0~N/5-1: 0th, z_r:N/5~2*N/5-1: 1 th
+		z_i = (double *) malloc(N*sizeof(double)); // z_i:0~N/5-1: 0th, z_i:N/5~2*N/5-1: 1 th
+		u_r = (double *) malloc(N*sizeof(double)); // z_r:0~N/5-1: 0th, z_r:N/5~2*N/5-1: 1 th
+		u_i = (double *) malloc(N*sizeof(double)); // z_i:0~N/5-1: 0th, z_i:N/5~2*N/5-1: 1 th
 		
 		for(k=0;k<N/5;++k)
 		{
-			x_50_re[k] = x_re[5*k];
-			x_50_im[k] = x_im[5*k];
-			x_51_re[k] = x_re[5*k+1];
-			x_51_im[k] = x_im[5*k+1];
-			x_52_re[k] = x_re[5*k+2];
-			x_52_im[k] = x_im[5*k+2];
-			x_53_re[k] = x_re[5*k+3];
-			x_53_im[k] = x_im[5*k+3];
-			x_54_re[k] = x_re[5*k+4];
-			x_54_im[k] = x_im[5*k+4];
+			z_r[k] = x_re[5*k];
+			z_i[k] = x_im[5*k];
+			z_r[N/5+k] = x_re[5*k+1];
+			z_i[N/5+k] = x_im[5*k+1];
+			z_r[2*N/5+k] = x_re[5*k+2];
+			z_i[2*N/5+k] = x_im[5*k+2];
+			z_r[3*N/5+k] = x_re[5*k+3];
+			z_i[3*N/5+k] = x_im[5*k+3];
+			z_r[4*N/5+k] = x_re[5*k+4];
+			z_i[4*N/5+k] = x_im[5*k+4];
 		}
-		Fast_Fourier_Transform(y_50_re, y_50_im, x_50_re, x_50_im, N/5);
-		Fast_Fourier_Transform(y_51_re, y_51_im, x_51_re, x_51_im, N/5);
-		Fast_Fourier_Transform(y_52_re, y_52_im, x_52_re, x_52_im, N/5);
-		Fast_Fourier_Transform(y_53_re, y_53_im, x_53_re, x_53_im, N/5);
-		Fast_Fourier_Transform(y_54_re, y_54_im, x_54_re, x_54_im, N/5);
-		// y_k = even_k + w_N^k odd_k = even_k + (a + bi)
+		Fast_Fourier_Transform(u_r, u_i, z_r, z_i, N/5);
+		Fast_Fourier_Transform(u_r+N/5, u_i+N/5, z_r+N/5, z_i+N/5, N/5);
+		Fast_Fourier_Transform(u_r+2*N/5, u_i+2*N/5, z_r+2*N/5, z_i+2*N/5, N/5);
+		Fast_Fourier_Transform(u_r+3*N/5, u_i+3*N/5, z_r+3*N/5, z_i+3*N/5, N/5);
+		Fast_Fourier_Transform(u_r+4*N/5, u_i+4*N/5, z_r+4*N/5, z_i+4*N/5, N/5);
 		w_N_re =  cos(2.0*M_PI/5);
 		w_N_im = -sin(2.0*M_PI/5);
 		
@@ -322,47 +252,43 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 			w_4_re = w_2_re * w_2_re - w_2_im * w_2_im;
 			w_4_im = 2 * w_2_re * w_2_im;
 			
-			// multiply (w_re + w_im * i) on x[q]
-			t_rq = y_51_re[k];
-			y_51_re[k] = w_re * y_51_re[k] - w_im * y_51_im[k];
-			y_51_im[k] = w_re * y_51_im[k] + w_im * t_rq;
-			// multiply (w_re + w_im * i)^2 = w_re - w_im * i on x[r]
-			t_rr = y_52_re[k];
-			y_52_re[k] = w_2_re * y_52_re[k] - w_2_im*y_52_im[k];
-			y_52_im[k] = w_2_re * y_52_im[k] + w_2_im*t_rr;
+			u1_r = w_re * u_r[N/5+k] - w_im * u_i[N/5+k];
+			u1_i = w_re * u_i[N/5+k] + w_im * u_r[N/5+k];
+			
+			u2_r = w_2_re * u_r[2*N/5+k] - w_2_im*u_i[2*N/5+k];
+			u2_i = w_2_re * u_i[2*N/5+k] + w_2_im*u_r[2*N/5+k];
 				
-			t_rs = y_53_re[k];
-			y_53_re[k] = w_3_re * y_53_re[k] - w_3_im * y_53_im[k];
-			y_53_im[k] = w_3_re * y_53_im[k] + w_3_im * t_rs;
+			u3_r = w_3_re * u_r[3*N/5+k] - w_3_im * u_i[3*N/5+k];
+			u3_i = w_3_re * u_i[3*N/5+k] + w_3_im * u_r[3*N/5+k];
 			
-			t_rt = y_54_re[k];
-			y_54_re[k] = w_4_re * y_54_re[k] - w_4_im * y_54_im[k];
-			y_54_im[k] = w_4_re * y_54_im[k] + w_4_im * t_rt;
-	//=============================================================================================================================================================
+			u4_r = w_4_re * u_r[4*N/5+k] - w_4_im * u_i[4*N/5+k];
+			u4_i = w_4_re * u_i[4*N/5+k] + w_4_im * u_r[4*N/5+k];
 			
+	
 			w_N_2_re = w_N_re * w_N_re - w_N_im * w_N_im;
 			w_N_2_im = 2 * w_N_re * w_N_im;	
 			
-			y_re[k] 	  = y_50_re[k] + y_51_re[k] + y_52_re[k] + y_53_re[k] + y_54_re[k];
-			y_im[k] 	  = y_50_im[k] + y_51_im[k] + y_52_im[k] + y_53_im[k] + y_54_im[k]; 
+			y_re[k] 	  = u_r[k] + u1_r + u2_r + u3_r + u4_r;
+			y_im[k] 	  = u_i[k] + u1_i + u2_i + u3_i + u4_i;
 			
-			y_re[N/5+k]   = y_50_re[k] + w_N_re * (y_51_re[k] + y_54_re[k]) - w_N_im * (y_51_im[k] - y_54_im[k]) + w_N_2_re * (y_52_re[k] + y_53_re[k]) - w_N_2_im * (y_52_im[k] - y_53_im[k]);
-			y_im[N/5+k]   = y_50_im[k] + w_N_re * (y_51_im[k] + y_54_im[k]) + w_N_im * (y_51_re[k] - y_54_re[k]) + w_N_2_re * (y_52_im[k] + y_53_im[k]) + w_N_2_im * (y_52_re[k] - y_53_re[k]);
+			y_re[N/5+k]   = u_r[k] + w_N_re * (u1_r + u4_r) - w_N_im * (u1_i - u4_i) + w_N_2_re * (u2_r + u3_r) - w_N_2_im * (u2_i - u3_i);
+			y_im[N/5+k]   = u_i[k] + w_N_re * (u1_i + u4_i) + w_N_im * (u1_r - u4_r) + w_N_2_re * (u2_i + u3_i) + w_N_2_im * (u2_r - u3_r);
 			
-			y_re[2*N/5+k] = y_50_re[k] + w_N_re * (y_52_re[k] + y_53_re[k]) - w_N_im * (y_53_im[k] - y_52_im[k]) + w_N_2_re * (y_51_re[k] + y_54_re[k]) - w_N_2_im * (y_51_im[k] - y_54_im[k]);
-			y_im[2*N/5+k] = y_50_im[k] + w_N_re * (y_52_im[k] + y_53_im[k]) + w_N_im * (y_53_re[k] - y_52_re[k]) + w_N_2_re * (y_51_im[k] + y_54_im[k]) + w_N_2_im * (y_51_re[k] - y_54_re[k]);
+			y_re[2*N/5+k] = u_r[k] + w_N_re * (u2_r + u3_r) - w_N_im * (u3_i - u2_i) + w_N_2_re * (u1_r + u4_r) - w_N_2_im * (u1_i - u4_i);
+			y_im[2*N/5+k] = u_i[k] + w_N_re * (u2_i + u3_i) + w_N_im * (u3_r - u2_r) + w_N_2_re * (u1_i + u4_i) + w_N_2_im * (u1_r - u4_r);
 
-			y_re[3*N/5+k] = y_50_re[k] + w_N_re * (y_52_re[k] + y_53_re[k]) - w_N_im * (y_52_im[k] - y_53_im[k]) + w_N_2_re * (y_54_re[k] + y_51_re[k]) - w_N_2_im * (y_54_im[k] - y_51_im[k]);
-			y_im[3*N/5+k] = y_50_im[k] + w_N_re * (y_52_im[k] + y_53_im[k]) + w_N_im * (y_52_re[k] - y_53_re[k]) + w_N_2_re * (y_54_im[k] + y_51_im[k]) + w_N_2_im * (y_54_re[k] - y_51_re[k]);
+			y_re[3*N/5+k] = u_r[k] + w_N_re * (u2_r + u3_r) - w_N_im * (u2_i - u3_i) + w_N_2_re * (u4_r + u1_r) - w_N_2_im * (u4_i - u1_i);
+			y_im[3*N/5+k] = u_i[k] + w_N_re * (u2_i + u3_i) + w_N_im * (u2_r - u3_r) + w_N_2_re * (u4_i + u1_i) + w_N_2_im * (u4_r - u1_r);
 			
-			y_re[4*N/5+k] = y_50_re[k] + w_N_re * (y_51_re[k] + y_54_re[k]) - w_N_im * (y_54_im[k] - y_51_im[k]) + w_N_2_re * (y_53_re[k] + y_52_re[k]) - w_N_2_im * (y_53_im[k] - y_52_im[k]);
-			y_im[4*N/5+k] = y_50_im[k] + w_N_re * (y_51_im[k] + y_54_im[k]) + w_N_im * (y_54_re[k] - y_51_re[k]) + w_N_2_re * (y_53_im[k] + y_52_im[k]) + w_N_2_im * (y_53_re[k] - y_52_re[k]);
+			y_re[4*N/5+k] = u_r[k] + w_N_re * (u1_r + u4_r) - w_N_im * (u4_i - u1_i) + w_N_2_re * (u3_r + u2_r) - w_N_2_im * (u3_i - u2_i);
+			y_im[4*N/5+k] = u_i[k] + w_N_re * (u1_i + u4_i) + w_N_im * (u4_r - u1_r) + w_N_2_re * (u3_i + u2_i) + w_N_2_im * (u3_r - u2_r);
+			/* 
+			temp = w_re;
+			w_re = w_re*w_N_re - w_im*w_N_im;
+			w_im = temp*w_N_im + w_im*w_N_re;
+			*/ 
 		}
-		free(y_50_re);free(y_50_im);free(x_50_re);free(x_50_im);
-		free(y_51_re);free(y_51_im);free(x_51_re);free(x_51_im);		
-		free(y_52_re);free(y_52_im);free(x_52_re);free(x_52_im);
-		free(y_53_re);free(y_53_im);free(x_53_re);free(x_53_im);		
-		free(y_54_re);free(y_54_im);free(x_54_re);free(x_54_im);
+		free(u_r); free(u_i); free(z_r); free(z_i);
 	}
 	else
 	{

@@ -9,15 +9,15 @@ int main()
 	int i, p, q, r, N;
 	double T1;
 	clock_t t1, t2;
-	/*	
+	/* 
 	printf("input 2^p 3^q 5^r : (p, q, r) = ");
 	scanf("%d %d %d", &p, &q, &r);
 	N = (int)(pow(2, p) * pow(3, q) * pow(5, r));
-	*/
+	*/ 
 	// N = 14348907;
 	// N = 134217728;
-	 N = 33554432;
-	// N = 27000000;
+	// N = 33554432;
+	 N = 125;
 	// N = 134217728;
 	printf("N = %d\n",N);
 	
@@ -39,12 +39,12 @@ int main()
 	T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
 	printf("FFT_ver1 of %d elements: %f\n",N, T1);
 		
-	#if DEBUG
+	//#if DEBUG
 	for(i=0;i<N;++i)
 	{
 		printf("%f + %f i\n", y_re[i], y_im[i]);
 	}
-	#endif
+	//#endif
 	
 	free(y_re);
 	free(x_re);

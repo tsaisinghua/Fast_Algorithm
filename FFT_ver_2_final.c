@@ -7,21 +7,31 @@
 
 int main()
 {
-	int i, p, n = 0;
-	int N ;	
+	int i, p, q, r, n = 0;
+	int N;
+	
 	double *x_re, *x_im;
+	
 	double T1;
 	clock_t t1, t2;
 	
-	//N = 43046721;
-	//N = 134217728;
-	// N = 12;
-	N = 24300000;
-	//N = 14348907;
-	//N = 33554432;
+	 N =  2*2*2*2*5*3*3*3*3*5*5*5;
+	// N = 43046721;
+	// N = 134217728;
+	// N = 270000000;
+	// N = 14348907;
+	// N = 33554432;
+	// N = 24300000;
+	// N = 1200000;
+	/*
+	printf("input 2^p 3^q 5^r : (p, q, r) = ");
+	scanf("%d %d %d", &p, &q, &r);
+	N = (int)(pow(2, p) * pow(3, q) * pow(5, r));
+	*/
 	printf("N = %d\n",N);
-	x_re = (double *) malloc( N * sizeof(double));
-	x_im = (double *) malloc( N * sizeof(double));
+	x_re = (double *)malloc( N * sizeof(double));
+	x_im = (double *)malloc( N * sizeof(double));
+	
 	for(i=0;i<N;++i)
 	{
 		x_re[i] = i;
@@ -33,14 +43,16 @@ int main()
 	t2 = clock();
 	T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
 	printf("FFT_ver2 of %d elements: %f\n",N, T1);
-	#if DEBUG 	
-	for(i=0;i<N;++i)
+	
+	//#if DEBUG 	
+	for(i=0;i<500;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
 	} 
-	#endif
+	//#endif
 	free(x_re);
 	free(x_im);
+	
 	return;
 }
 
@@ -50,12 +62,14 @@ int FFT(double *x_re, double *x_im, int N)
 {	
 	int N0, i, p, n = 0;
 	int *order;
+	
 	double T1;
 	clock_t t1, t2;
 	N0 = N;
     p = 1;
     
-    order = (int *) malloc( N * sizeof(int));
+    order = (int *)malloc( N * sizeof(int));
+   
     
     while (N0>1)
 	{
@@ -91,18 +105,18 @@ int FFT(double *x_re, double *x_im, int N)
 	bit_reverse(x_re, x_im, N, order);
 	
 	i = 0;
-	
 	while(N0<N && i<=n)
 	{
 		#if DEBUG
 		printf("N0 = %d, order[%d] = %d\n", N0, i, order[i]);
 		#endif
 	
-		butterfly(x_re, x_im, N, order[i], N0);		
+		butterfly(x_re, x_im, N, order[i], N0);	
 		N0 *= order[i];
 		i++;
 	}
 	free(order);
+	
 	return 0;
 }
 
@@ -112,12 +126,20 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
 {
     int m, t, p, q, i, k, tp, change_index_p;
     int n = 0;
+    int P = 2;	// No. of threads
+    int tid;
+	omp_set_num_threads(P);
+	
+    double *new_x_re;
+    double *new_x_im;	
     int *change_index;
-    int *cyclic;
+    //int *cyclic;
     m = N/order[n];
     
-    change_index = (int*)malloc(N*sizeof(int));
-    cyclic = (int*)malloc(N*sizeof(int));
+    new_x_re = (double *)malloc( N * sizeof(double));
+    new_x_im = (double *)malloc( N * sizeof(double));
+    change_index = (int *)malloc(N * sizeof(int));			//存取 bit reverse 後的結果 change_index[p] = q (p <-> q)
+    //cyclic = (int*)malloc(N*sizeof(int));
     
     #if DEBUG
 	printf("order[%d] = %d , m = %d\n",n, order[n], m);
@@ -125,7 +147,6 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
 	
 	change_index[0] = 0;
 	change_index[N-1] = N-1;
-	
 	q = m;
 	// i = 2;
 	// 中間的 p, q 需用 bit_reverse 查看
@@ -148,60 +169,35 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
 	    q = q+k;
 	}
 	
-	//initial value
-	p = 1;
-	tp = p;
-	cyclic[0] = p;	
-	n = 0;
-	//while(p != N-1)
-	while(p != N-1)
-	{
-		cyclic[0] = p;
-		n = 0;
-		while(p != change_index[p] && change_index[p] != cyclic[0])
+	//將對應到的值放在指定的位置上！ 
+	#pragma omp parallel private(tid, i)
+    {
+    	tid = omp_get_thread_num();
+    	#pragma omp for
+    	for(i=0;i<N;i++)
 		{
-			//printf("====change_index[%d] = %d\n", p, change_index[p]);
-			cyclic[n] = p;
-			cyclic[n+1] = change_index[p];
-			p = cyclic[n+1];
-			n++;
+			new_x_re[i] = x_re[change_index[i]];
+			new_x_im[i] = x_im[change_index[i]];
 		}
-		#if DEBUG
-		for(i=0;i<=n;i++)
-		{
-			printf("cyclic[%d] = %d\n", i, cyclic[i]);
-		}
-		#endif
-		
-		for(i=0;i<n;i++)
-		{	
-			t = x_re[cyclic[i]];
-		    x_re[cyclic[i]] = x_re[cyclic[i+1]];
-			x_re[cyclic[i+1]] = t;
-		    t = x_im[cyclic[i]];
-		    x_im[cyclic[i]] = x_im[cyclic[i+1]];
-			x_im[cyclic[i+1]] = t;
-			
-			change_index[cyclic[i]] = 0;			//將交換過的 index 歸零 
-			change_index[cyclic[i+1]] = 0;
-		}
-		
-		change_index_p = cyclic[0]+1;
-		while(change_index[change_index_p] == 0)
-		{
-			change_index_p++;
-		}
-		p = change_index_p;
-		#if DEBUG
+		#pragma omp for
 		for(i=0;i<N;i++)
 		{
-			printf("change_index[%d] = %d, p= %d, tp = %d, change_index_p = %d\n", i, change_index[i], p, tp, change_index_p);
+			x_re[i] = new_x_re[i];
+			x_im[i] = new_x_im[i];
 		}
-		#endif
-		
 	}
+	#if DEBUG
+	printf("new_x = \n");
+	for(i=0;i<N;i++)		
+	{
+		printf("%f + %f i \n", new_x_re[i], new_x_im[i]);
+		//printf("%f + %f i \n", x_re[i], x_im[i]);
+	}
+	#endif
 	free(change_index);
-	free(cyclic);
+	free(new_x_re);
+	free(new_x_im);
+	//free(cyclic);
 	return 0;
 }
 
@@ -315,7 +311,14 @@ int bit_reverse_2(double *x_re, double *x_im, int N, int *order)
 		{
 			printf("change_index[%d]=%d\n", i, change_index[i]);
 		}
-		#endif
+		#endif	
+	}
+	
+	for(i=0;i<N;i++)		
+	{
+		//printf("change_index[%d] = %d, p= %d, change_index_p = %d\n", i, change_index[i], p,change_index_p);	
+		printf("%f + %f i \n", x_re[i], x_im[i]);
+		//printf("%f + %f i \n", x_re[i], x_im[i]);
 	}
 	free(change_index);
 	free(cyclic);
