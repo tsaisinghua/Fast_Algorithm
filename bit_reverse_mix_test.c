@@ -3,7 +3,7 @@
 #include <omp.h>
 #include <math.h>
 #include <time.h>
-#define DEBUG 0
+#define DEBUG 0 
 
 int main()
 {
@@ -13,7 +13,7 @@ int main()
 	double T1;
 	clock_t t1, t2;
 	
-	N = 12;	
+	N = 27000;
 	printf("N = %d\n",N);
 	x_re = (double *) malloc( N * sizeof(double));
 	x_im = (double *) malloc( N * sizeof(double));
@@ -93,12 +93,227 @@ int FFT(double *x_re, double *x_im, int N)
 		printf("N0 = %d, order[%d] = %d\n", N0, i, order[i]);
 		#endif
 	
-		butterfly(x_re, x_im, N, order[i], N0);
-		
+		butterfly(x_re, x_im, N, order[i], N0);		
 		N0 *= order[i];
 		i++;
 	}
 	free(order);
+	return 0;
+}
+
+//========================================================================================
+
+int bit_reverse(double *x_re, double *x_im, int N, int *order)
+{
+    int m, t, p, q, i, k, tp, change_index_p;
+    int n = 0;
+    int *change_index;
+    int *cyclic;
+    m = N/order[n];
+    
+    change_index = (int*)malloc(N*sizeof(int));
+    cyclic = (int*)malloc(N*sizeof(int));
+    
+    #if DEBUG
+	printf("order[%d] = %d , m = %d\n",n, order[n], m);
+	#endif
+	
+	change_index[0] = 0;
+	change_index[N-1] = N-1;
+	
+	q = m;
+	// i = 2;
+	// 中間的 p, q 需用 bit_reverse 查看
+	for(p=1;p<N-1;p++)
+   	{	
+   		change_index[p] = q;
+	   	
+	   	#if DEBUG 
+	    printf("p=%d, q=%d\n", p, change_index[p]);
+	    #endif
+			    
+		k = m;
+	    n = 0;
+	    while(q >= (order[n]-1)*k && k > 0)
+	    {
+	        q = q-(order[n]-1)*k;
+			n++;
+	        k /= order[n];
+	    }
+	    q = q+k;
+	}
+	
+	//initial value
+	p = 1;
+	tp = p;
+	cyclic[0] = p;	
+	n = 0;
+	//while(p != N-1)
+	while(p != N-1)
+	{
+		cyclic[0] = p;
+		n = 0;
+		while(p != change_index[p] && change_index[p] != cyclic[0])
+		{
+			//printf("====change_index[%d] = %d\n", p, change_index[p]);
+			cyclic[n] = p;
+			cyclic[n+1] = change_index[p];
+			p = cyclic[n+1];
+			n++;
+		}
+		#if DEBUG
+		for(i=0;i<=n;i++)
+		{
+			printf("cyclic[%d] = %d\n", i, cyclic[i]);
+		}
+		#endif
+		
+		for(i=0;i<n;i++)
+		{	
+			t = x_re[cyclic[i]];
+		    x_re[cyclic[i]] = x_re[cyclic[i+1]];
+			x_re[cyclic[i+1]] = t;
+		    t = x_im[cyclic[i]];
+		    x_im[cyclic[i]] = x_im[cyclic[i+1]];
+			x_im[cyclic[i+1]] = t;
+			
+			change_index[cyclic[i]] = 0;			//將交換過的 index 歸零 
+			change_index[cyclic[i+1]] = 0;
+		}
+		
+		change_index_p = cyclic[0]+1;
+		while(change_index[change_index_p] == 0)
+		{
+			change_index_p++;
+		}
+		p = change_index_p;
+		#if DEBUG
+		for(i=0;i<N;i++)
+		{
+			printf("change_index[%d] = %d, p= %d, tp = %d, change_index_p = %d\n", i, change_index[i], p, tp, change_index_p);
+		}
+		#endif
+		
+	}
+	free(change_index);
+	free(cyclic);
+	return 0;
+}
+
+//========================================================================================
+
+int bit_reverse_2(double *x_re, double *x_im, int N, int *order)
+{
+    int m, t, p, q, i, k, change_index_p;
+    int n = 0;
+    int *change_index;
+    int *cyclic;
+    m = N/order[n];
+    
+    change_index = (int*)malloc(2*N*sizeof(int));
+    cyclic = (int*)malloc(N*sizeof(int));
+    
+    #if DEBUG
+	printf("order[%d] = %d , m = %d\n",n, order[n], m);
+	#endif
+	
+	//第一組 p, q 不動 
+	change_index[0] = 0;
+	change_index[1] = 0;
+	//最後一組 p, q 也不動 
+	change_index[2*N-2] = N-1;
+	change_index[2*N-1] = N-1;
+	
+	q = m;
+	i = 2;
+	//中間的 p, q 需用 bit_reverse 查看	 
+	for(p=1;p<N-1;p++)
+   	{	
+   		change_index[i] = p;
+	   	change_index[i+1] = q;
+	   	
+		
+	   	#if DEBUG 
+	    printf("i_p=%d, p=%d, i_q=%d,  q=%d\n", i, change_index[i], i+1, change_index[i+1]);
+	    printf("p=%d, q=%d\n", change_index[10], change_index[11]);
+	    #endif
+	    i += 2;	  	
+	    
+		k = m;
+	    n = 0;
+	    while(q >= (order[n]-1)*k & k > 0)
+	    {
+	        q = q-(order[n]-1)*k;
+			n++;
+	        k /= order[n];
+	        //printf("%d,%d\n",q,k);
+	    }
+	    q = q+k;
+		#if DEBUG
+		printf("2.q=%d, k=%d\n",q,k);
+	  	printf("========================\n");
+		#endif  
+	}
+	
+	change_index_p = 0;
+	cyclic[0] = 1;
+	while(cyclic[0] != N-1)
+	{
+		change_index_p += 2;
+		p = change_index[change_index_p];	// p 的起始值 (在 change_index[2] 的位置) 
+		while(p == 0)
+		{
+			change_index_p += 2;
+			p = change_index[change_index_p];
+		}
+		n = 0;
+		cyclic[0] = p;
+	
+		//printf("p=%d, q=%d\n", change_index[10], change_index[11]);
+		while((change_index[2*p] != change_index[2*p+1]) && (change_index[2*p+1] != cyclic[0]))
+		{
+			cyclic[n] = change_index[2*p];
+			cyclic[n+1] = change_index[2*p+1];
+			p = change_index[2*p+1];
+			n++;
+		}
+		n++;	
+		
+		#if DEBUG
+		for(i=0;i<n;i++)
+		{
+			printf("cyclic[%d] = %d\n", i, cyclic[i]);
+		}
+		#endif
+		
+		// x[p] 與 x[q] 互換，終止條件：下一個要換的，為一開始的 p, i.e. q = p (= cyclic[0])
+		// Ex. 1 -> 4 -> 6 ->1   	
+		// cyclic = [1 4 6]
+		// i=0, 1 <-> 4, i=1, 4 <-> 6
+		for(i=0;i<n-1;i++)
+		{	
+			t = x_re[cyclic[i]];
+		    x_re[cyclic[i]] = x_re[cyclic[i+1]];
+			x_re[cyclic[i+1]] = t;
+		    t = x_im[cyclic[i]];
+		    x_im[cyclic[i]] = x_im[cyclic[i+1]];
+			x_im[cyclic[i+1]] = t;
+			
+			change_index[2*cyclic[i]] = 0;			//將交換過的 index 歸零 
+			change_index[2*cyclic[i]+1] = 0;
+			change_index[2*cyclic[i+1]] = 0;
+			change_index[2*cyclic[i+1]+1] = 0;
+		}
+				
+		#if DEBUG
+		for(i=0;i<2*N;i++)
+		{
+			printf("change_index[%d]=%d\n", i, change_index[i]);
+		}
+		#endif
+	}
+	free(change_index);
+	free(cyclic);
 	return 0;
 }
 
@@ -265,123 +480,6 @@ int butterfly(double *x_re, double *x_im, int N, int prime, int N0)
 		printf("we didn't do this! p = 1; N = %d\n", N);
 	}
 	return;
-}
-
-//========================================================================================
-
-int bit_reverse(double *x_re, double *x_im, int N, int *order)
-{
-    int m, t, p, q, i, k, change_index_p;
-    int n = 0;
-    int *change_index;
-    int *cyclic;
-    m = N/order[n];
-    
-    change_index = (int*)malloc(2*N*sizeof(int));
-    cyclic = (int*)malloc(N*sizeof(int));
-    
-    #if DEBUG
-	printf("order[%d] = %d , m = %d\n",n, order[n], m);
-	#endif
-	
-	//第一組 p, q 不動 
-	change_index[0] = 0;
-	change_index[1] = 0;
-	//最後一組 p, q 也不動 
-	change_index[2*N-2] = N-1;
-	change_index[2*N-1] = N-1;
-	
-	q = m;
-	i = 2;
-	//中間的 p, q 需用 bit_reverse 查看	 
-	for(p=1;p<N-1;p++)
-   	{	
-   		change_index[i] = p;
-	   	change_index[i+1] = q;
-	   	
-		
-	   	#if DEBUG 
-	    printf("i_p=%d, p=%d, i_q=%d,  q=%d\n", i, change_index[i], i+1, change_index[i+1]);
-	    printf("p=%d, q=%d\n", change_index[10], change_index[11]);
-	    #endif
-	    i += 2;	  	
-	    
-		k = m;
-	    n = 0;
-	    while(q >= (order[n]-1)*k & k > 0)
-	    {
-	        q = q-(order[n]-1)*k;
-			n++;
-	        k /= order[n];
-	        //printf("%d,%d\n",q,k);
-	    }
-	    q = q+k;
-		#if DEBUG
-		printf("2.q=%d, k=%d\n",q,k);
-	  	printf("========================\n");
-		#endif  
-	}
-	
-	change_index_p = 0;
-	cyclic[0] = 1;
-	while(cyclic[0] != N-1)
-	{
-		change_index_p += 2;
-		p = change_index[change_index_p];	// p 的起始值 (在 change_index[2] 的位置) 
-		while(p == 0)
-		{
-			change_index_p += 2;
-			p = change_index[change_index_p];
-		}
-		n = 0;
-		cyclic[0] = p;
-	
-		//printf("p=%d, q=%d\n", change_index[10], change_index[11]);
-		while((change_index[2*p] != change_index[2*p+1]) && (change_index[2*p+1] != cyclic[0]))
-		{
-			cyclic[n] = change_index[2*p];
-			cyclic[n+1] = change_index[2*p+1];
-			p = change_index[2*p+1];
-			n++;
-		}
-		n++;	
-		
-		#if DEBUG
-		for(i=0;i<n;i++)
-		{
-			printf("cyclic[%d] = %d\n", i, cyclic[i]);
-		}
-		#endif
-		
-		// x[p] 與 x[q] 互換，終止條件：下一個要換的，為一開始的 p, i.e. q = p (= cyclic[0])
-		// Ex. 1 -> 4 -> 6 ->1   	
-		// cyclic = [1 4 6]
-		// i=0, 1 <-> 4, i=1, 4 <-> 6
-		for(i=0;i<n-1;i++)
-		{	
-			t = x_re[cyclic[i]];
-		    x_re[cyclic[i]] = x_re[cyclic[i+1]];
-			x_re[cyclic[i+1]] = t;
-		    t = x_im[cyclic[i]];
-		    x_im[cyclic[i]] = x_im[cyclic[i+1]];
-			x_im[cyclic[i+1]] = t;
-			
-			change_index[2*cyclic[i]] = 0;			//將交換過的 index 歸零 
-			change_index[2*cyclic[i]+1] = 0;
-			change_index[2*cyclic[i+1]] = 0;
-			change_index[2*cyclic[i+1]+1] = 0;
-		}
-				
-		#if DEBUG
-		for(i=0;i<2*N;i++)
-		{
-			printf("change_index[%d]=%d\n", i, change_index[i]);
-		}
-		#endif
-	}
-	free(change_index);
-	free(cyclic);
-	return 0;
 }
 
 
