@@ -7,7 +7,7 @@
 //
 
 #include "fft.h"
-#define DEBUG 1
+#define DEBUG 0
 void swap(double *p,double *q)
 {
     double tmp;
@@ -79,8 +79,8 @@ int fft(double *x_r, double *x_i, double *y_r, double *y_i, int N)
         m--;       
         #if DEBUG
 		printf("original, N0 = %d\n",N0);
-		#endif         
 		printf("N0 = %d, order[%d] = %d, n = %d\n",N0,m,order[m],n);
+		#endif
 		butterfly(y_r, y_i, N, order[m],N0);
 		#if DEBUG
         printf("after butterfly function, N0 = %d\n",N0);
@@ -133,7 +133,7 @@ int bit_reverse(double *y_r, double *y_i, int N,int c)
         }
         q = q+k;
     }
-    print_complex(y_r, y_i, N);
+    //print_complex(y_r, y_i, N);
     return 0;
 }
 

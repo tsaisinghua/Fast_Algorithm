@@ -13,7 +13,10 @@ int main()
 	double T1;
 	clock_t t1, t2;
 	
-	N = 27000;
+	//N = 43046721;
+	N = 134217728;
+	//N = 14348907;
+	//N = 33554432;
 	printf("N = %d\n",N);
 	x_re = (double *) malloc( N * sizeof(double));
 	x_im = (double *) malloc( N * sizeof(double));
