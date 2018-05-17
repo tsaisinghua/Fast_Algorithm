@@ -44,12 +44,12 @@ int main()
 	T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
 	printf("FFT_ver2 of %d elements: %f\n",N, T1);
 	
-	//#if DEBUG 	
-	for(i=0;i<500;++i)
+	#if DEBUG 	
+	for(i=0;i<N;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
 	} 
-	//#endif
+	#endif
 	free(x_re);
 	free(x_im);
 	

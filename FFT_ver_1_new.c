@@ -16,8 +16,8 @@ int main()
 	*/ 
 	// N = 14348907;
 	// N = 134217728;
-	// N = 33554432;
-	 N = 125;
+	 N = 33554432;
+	// N = 125;
 	// N = 134217728;
 	printf("N = %d\n",N);
 	
@@ -39,12 +39,12 @@ int main()
 	T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
 	printf("FFT_ver1 of %d elements: %f\n",N, T1);
 		
-	//#if DEBUG
+	#if DEBUG
 	for(i=0;i<N;++i)
 	{
 		printf("%f + %f i\n", y_re[i], y_im[i]);
 	}
-	//#endif
+	#endif
 	
 	free(y_re);
 	free(x_re);

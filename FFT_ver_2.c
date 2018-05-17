@@ -19,9 +19,16 @@ int main()
 	q = 0;
 	r = 0;
 	N = pow(2, p) * pow(3, q) * pow(5, r);
+	
+	N = 33554432;
 	printf("N=%d\n",N);
 	
-	double y_re[N], y_im[N], x_re[N], x_im[N];
+	//double y_re[N], y_im[N], x_re[N], x_im[N];
+	double *x_re, *x_im;
+	
+	x_re = (double *)malloc( N * sizeof(double));
+	x_im = (double *)malloc( N * sizeof(double));
+	
 	for(i=0;i<N;++i)
 	{
 		x_re[i] = i;
@@ -35,12 +42,14 @@ int main()
 	T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
 	printf("FFT_ver2 of %d elements: %f\n",N, T1);
 	
-	//#if DEBUG
+	#if DEBUG
 	for(i=0;i<N;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
 	}
-	//#endif
+	#endif
+	free(x_re);
+	free(x_im);
 	return;
 	 
 }
