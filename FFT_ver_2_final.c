@@ -4,6 +4,10 @@
 #include <math.h>
 #include <time.h>
 #define DEBUG 0 
+int FFT(double *x_re, double *x_im, int N);
+int bit_reverse(double *x_re, double *x_im, int N, int *order);
+int bit_reverse_2(double *x_re, double *x_im, int N, int *order);
+int butterfly(double *x_re, double *x_im, int N, int prime, int N0);
 
 int main()
 {
@@ -14,8 +18,8 @@ int main()
 	
 	double T1;
 	clock_t t1, t2;
-	
-	 N =  2*2*2*2*5*3*3*3*3*5*5*5;
+	// N = 110592000;
+	// N =  2*2*2*3*3*3*5*5*5;
 	// N = 43046721;
 	// N = 134217728;
 	// N = 270000000;
@@ -23,11 +27,11 @@ int main()
 	// N = 33554432;
 	// N = 24300000;
 	// N = 1200000;
-	/*
+	
 	printf("input 2^p 3^q 5^r : (p, q, r) = ");
 	scanf("%d %d %d", &p, &q, &r);
 	N = (int)(pow(2, p) * pow(3, q) * pow(5, r));
-	*/
+	
 	printf("N = %d\n",N);
 	x_re = (double *)malloc( N * sizeof(double));
 	x_im = (double *)malloc( N * sizeof(double));
@@ -53,7 +57,7 @@ int main()
 	free(x_re);
 	free(x_im);
 	
-	return;
+	return 0;
 }
 
 //========================================================================================
@@ -104,16 +108,23 @@ int FFT(double *x_re, double *x_im, int N)
 	
 	bit_reverse(x_re, x_im, N, order);
 	
-	i = 0;
-	while(N0<N && i<=n)
+	omp_set_num_threads(4);
+	#pragma omp parallel private(i)
+	{
+	for(i=0;i<=n;i++) 
 	{
 		#if DEBUG
 		printf("N0 = %d, order[%d] = %d\n", N0, i, order[i]);
 		#endif
-	
-		butterfly(x_re, x_im, N, order[i], N0);	
-		N0 *= order[i];
-		i++;
+		
+		
+		int tid;
+		tid = omp_get_thread_num();
+		butterfly(x_re, x_im, N, order[i], N0);
+		#pragma omp barrier
+		if(tid==0)	N0 *= order[i];
+		#pragma omp barrier		
+	}
 	}
 	free(order);
 	
@@ -126,9 +137,9 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
 {
     int m, t, p, q, i, k, tp, change_index_p;
     int n = 0;
-    int P = 2;	// No. of threads
-    int tid;
-	omp_set_num_threads(P);
+    //int P = 2;	// No. of threads
+    //int tid;
+	//omp_set_num_threads(P);
 	
     double *new_x_re;
     double *new_x_im;	
@@ -170,16 +181,16 @@ int bit_reverse(double *x_re, double *x_im, int N, int *order)
 	}
 	
 	//將對應到的值放在指定的位置上！ 
-	#pragma omp parallel private(tid, i)
+	//#pragma omp parallel private(tid, i)
     {
-    	tid = omp_get_thread_num();
-    	#pragma omp for
+    //	tid = omp_get_thread_num();
+    //	#pragma omp for
     	for(i=0;i<N;i++)
 		{
 			new_x_re[i] = x_re[change_index[i]];
 			new_x_im[i] = x_im[change_index[i]];
 		}
-		#pragma omp for
+	//	#pragma omp for
 		for(i=0;i<N;i++)
 		{
 			x_re[i] = new_x_re[i];
@@ -340,6 +351,7 @@ int butterfly(double *x_re, double *x_im, int N, int prime, int N0)
 	
 	if(prime == 2)
 	{
+		#pragma omp for
 		for(k=0;k<N0/2;k++) 
 		{
 			theta = 2.0*k*M_PI/N0;		//找下一個 W_N 要加的角度
@@ -372,6 +384,7 @@ int butterfly(double *x_re, double *x_im, int N, int prime, int N0)
 		theta1 = 2.0*M_PI/3;				
 		w_N_re =  cos(theta1);
 		w_N_im = -sin(theta1);
+		#pragma omp for
 		for(k=0;k<N0/3;k++)
 		{	 			
 			theta = 2.0*k*M_PI/N0;	 
@@ -418,6 +431,7 @@ int butterfly(double *x_re, double *x_im, int N, int prime, int N0)
 		theta1 = 2.0*M_PI/5;
 		w_N_re =  cos(theta1);
 		w_N_im = -sin(theta1);
+		#pragma omp for
 		for(k=0;k<N0/5;k++)
 		{	
 			theta = 2.0*k*M_PI/N0;		

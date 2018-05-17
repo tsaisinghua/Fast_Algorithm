@@ -15,7 +15,7 @@ int main()
 	printf("input 2^p 3^q 5^r : (p, q, r) = ");
 	scanf("%d %d %d", &p, &q, &r);
 	*/
-	p = 3;
+	p = 25;
 	q = 0;
 	r = 0;
 	N = pow(2, p) * pow(3, q) * pow(5, r);

@@ -4,16 +4,19 @@
 #include <math.h>
 #include <time.h>
 #define DEBUG 0
+
+int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_im, int N);
+
 int main()
 {
 	int i, p, q, r, N;
 	double T1;
 	clock_t t1, t2;
-	/*	
+		
 	printf("input 2^p 3^q 5^r : (p, q, r) = ");
 	scanf("%d %d %d", &p, &q, &r);
 	N = (int)(pow(2, p) * pow(3, q) * pow(5, r));
-	*/
+	
 	// N = 14348907;
 	// N = 134217728;
 	// N = 33554432;
@@ -21,7 +24,9 @@ int main()
 	// N = 1200000;
 	// N = 27000000;
 	// N = 134217728;
-	 N = 2*2*2*2*5*3*3*3*3*5*5*5;
+	// N = 2*2*2*2*5*3*3*3*3*5*5*5;
+	// N = 2*2*2*3*3*3*5*5*5;
+	// N = 33554432;
 	printf("N = %d\n",N);
 	
 	double *y_re, *y_im, *x_re, *x_im;
@@ -42,12 +47,12 @@ int main()
 	T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
 	printf("FFT_ver1 of %d elements: %f\n",N, T1);
 		
-	//#if DEBUG
-	for(i=0;i<500;++i)
+	#if DEBUG
+	for(i=0;i<N;++i)
 	{
 		printf("%f + %f i\n", y_re[i], y_im[i]);
 	}
-	//#endif
+	#endif
 	
 	free(y_re);
 	free(x_re);
@@ -90,10 +95,11 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 		}
 		Fast_Fourier_Transform(u_r, u_i, z_r, z_i, N/2);
 		Fast_Fourier_Transform(u_r+N/2, u_i+N/2, z_r+N/2, z_i+N/2, N/2);
-		w_N_re =  cos(2.0*M_PI/N);
-		w_N_im = -sin(2.0*M_PI/N);
+		theta1 = 2.0*M_PI/N;
+		w_N_re =  cos(theta1);
+		w_N_im = -sin(theta1);
 		w_re   = 1.0;
-		w_im   = 0.0; 
+		w_im   = 0.0;
 		for(k=0;k<N/2;++k)
 		{
 			a = w_re*u_r[N/2+k] - w_im*u_i[N/2+k];
