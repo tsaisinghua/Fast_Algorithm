@@ -12,11 +12,11 @@ int main()
 	int i, p, q, r, N;
 	double T1;
 	clock_t t1, t2;
-		
+	/*	
 	printf("input 2^p 3^q 5^r : (p, q, r) = ");
 	scanf("%d %d %d", &p, &q, &r);
 	N = (int)(pow(2, p) * pow(3, q) * pow(5, r));
-	
+	*/
 	// N = 14348907;
 	// N = 134217728;
 	// N = 33554432;
@@ -27,6 +27,8 @@ int main()
 	// N = 2*2*2*2*5*3*3*3*3*5*5*5;
 	// N = 2*2*2*3*3*3*5*5*5;
 	// N = 33554432;
+	
+	N = 10935000;
 	printf("N = %d\n",N);
 	
 	double *y_re, *y_im, *x_re, *x_im;
@@ -46,7 +48,8 @@ int main()
 	t2 = clock();
 	T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
 	printf("FFT_ver1 of %d elements: %f\n",N, T1);
-		
+	
+	system("pause");
 	#if DEBUG
 	for(i=0;i<N;++i)
 	{

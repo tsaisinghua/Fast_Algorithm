@@ -18,20 +18,12 @@ int main()
 	
 	double T1;
 	clock_t t1, t2;
-	// N = 110592000;
-	// N =  2*2*2*3*3*3*5*5*5;
-	// N = 43046721;
-	// N = 134217728;
-	// N = 270000000;
-	// N = 14348907;
-	// N = 33554432;
-	// N = 24300000;
-	// N = 1200000;
-	
+
 	printf("input 2^p 3^q 5^r : (p, q, r) = ");
 	scanf("%d %d %d", &p, &q, &r);
 	N = (int)(pow(2, p) * pow(3, q) * pow(5, r));
-	
+
+//	N = 48828125;
 	printf("N = %d\n",N);
 	x_re = (double *)malloc( N * sizeof(double));
 	x_im = (double *)malloc( N * sizeof(double));
@@ -48,12 +40,13 @@ int main()
 	T1 = (t2-t1)/(double) CLOCKS_PER_SEC;
 	printf("FFT_ver2 of %d elements: %f\n",N, T1);
 	
-	#if DEBUG 	
+	system("pause");
+	//#if DEBUG 	
 	for(i=0;i<N;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
 	} 
-	#endif
+	//#endif
 	free(x_re);
 	free(x_im);
 	
