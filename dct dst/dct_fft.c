@@ -1,16 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <math.h>
+#include <string.h> /* memset */
+#include <unistd.h> /* close */
 #define DEBUG 0
 //#define N 32
 int main()
 {
 	int i;
 	int N;
-	N = 32;
-	double y_re[N], y_im[N];
-	double x_re[32]={0};
-	double x_im[32]={0};
+	N = 16;
+	N = N*4;
+	double *y_re, *y_im, *x_re, *x_im;
+	y_re = (double *) malloc( N * sizeof(double));
+	y_im = (double *) malloc( N * sizeof(double));
+	x_re = (double *) malloc( N * sizeof(double));
+	x_im = (double *) malloc( N * sizeof(double));
+		
+	memset( x_re, 0, N*sizeof(double) );
+	memset( x_im, 0, N*sizeof(double) );
 	
 	for(i=0;i<N;++i)
 	{
@@ -23,11 +31,13 @@ int main()
 		x_re[2*i+1] = i;
 		x_im[i] = 0.0;
 	}
-	
+	#if DEBUG
 	for(i=0;i<N;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
 	}
+	#endif
+	
 	printf("2.================================\n");
 	
 	Fast_Fourier_Transform(y_re, y_im, x_re, x_im, N);
