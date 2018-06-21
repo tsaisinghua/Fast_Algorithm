@@ -6,7 +6,7 @@ int main()
 	int i, j, k, a, b, m, n, p, w, Iter_Max = 1000;
 	int *x, *X, *y, *Y, *z, *Z;
 	srand(time(NULL));
-	n = 8;
+	n = 4;
 	x = (int *) malloc(n*sizeof(int));
 	X = (int *) malloc(n*sizeof(int));
 	y = (int *) malloc(n*sizeof(int));
@@ -78,7 +78,9 @@ int main()
 	printf("p=%d for n=%d, w=%d, a=%d\n",p,n,w,a);
 	system("pause");
 	DFT(x,X,a,p,n,1);
+	 //FFT(x,X,a,p,n,1);
 	DFT(y,Y,a,p,n,1);
+	//FFT(y,Y,a,p,n,1);
 		
 	for(i=0;i<n;++i)
 	{
@@ -140,14 +142,60 @@ int DFT(int *x, int *y, int w, int p, int n, int dir)
 		printf("inverse of n: %d\n",a);
 		for(i=0;i<n;++i)
 		{
-			printf("1.y[i] = %d\n",y[i]);
-		}
-		for(i=0;i<n;++i)
-		{
 			y[i] = y[i]*a % p; 
-			printf("2.y[i] = %d\n",y[i]);
+			//printf("2.y[i] = %d\n",y[i]);
 		}
 	}
 	return 0;
 }
 
+int FFT(int *x, int *y, int w, int p, int n, int dir)
+{
+	int i, j, s, a, b;
+	a = 1;
+	if(n==2)
+	{
+		y[0] = (x[0] + x[1]) % p;
+		y[1] = (x[0] + w*x[1]) % p;
+	}
+	
+	/*else if(n>2 && (n%2)==0)
+	{
+		int *z, *u;
+		int w, w_n;
+		z = (int *) malloc(n*sizeof(int));
+		u = (int *) malloc(n*sizeof(int));
+		for(k=0;k<n/2;++k)
+		{
+			z[k] = x[2*k];
+			z[N/2+k]  = x[2*k+1];
+		}
+		FFT(z, u, w, p, n/2, dir);
+		FFT(z+N/2, u+N/2, w, p, dir);
+		theta1 = 2.0*M_PI/N;
+		w_n =  cos(theta1);
+		w   = 1;
+		
+		for(k=0;k<N/2;++k)
+		{
+			a = w_re*u_r[N/2+k] - w_im*u_i[N/2+k];
+			b = w_re*u_i[N/2+k] + w_im*u_r[N/2+k];
+			y_re[k]     = u_r[k] + a;
+			y_im[k]     = u_i[k] + b;
+			y_re[N/2+k] = u_r[k] - a;
+			y_im[N/2+k] = u_i[k] - b;
+			temp = w_re;
+			w_re = w_re*w_N_re - w_im*w_N_im;
+			w_im = temp*w_N_im + w_im*w_N_re;
+		}
+		free(u_r); free(u_i); free(z_r); free(z_i);
+	}	
+	else if(n==3)
+	{
+		y[0] = (x[0] + x[1] + x[2]) % p;
+		y[1] = (x[0] + w*x[1] + w*w*x[2]) % p;
+		y[2] = (x[0] + w*w*x[1] + w*x[2]) % p;
+	}
+	*/
+	return 0;
+}
