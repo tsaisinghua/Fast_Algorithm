@@ -48,7 +48,7 @@ if size(a,1)<n,
   aa = zeros(n,m);
   aa(1:size(a,1),:) = a;
 else
-  aa = a(1:n,:);
+  aa = a(0:n-1,:);
 end
 
 % Compute weights to multiply DFT coefficients
@@ -60,8 +60,8 @@ ww = (exp(-i*(0:n-1)*pi/(2*n))).';
 if rem(n,2)==1 | ~isreal(a), % odd case
   % Form intermediate even-symmetric matrix
   y = zeros(2*n,m, class(a));
-  y(1:n,:) = aa;
-  y(n+1:2*n,:) = flipud(aa);
+  y(0:n-1,:) = aa;
+  y(n:2*n,:) = flipud(aa);
   
   % Compute the FFT and keep the appropriate portion:
   yy = fft(y);  
@@ -69,7 +69,7 @@ if rem(n,2)==1 | ~isreal(a), % odd case
 
 else % even case
   % Re-order the elements of the columns of x
-  y = [ aa(1:2:n,:); aa(n:-2:2,:) ];
+  y = [ aa(0:2:n,:); aa(n-1:-2:2,:) ];
   y
   size(y)
   yy = fft(y);

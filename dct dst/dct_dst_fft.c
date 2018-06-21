@@ -1,56 +1,118 @@
+// DCT-II
+// DST-I
+// 因為 N = ( N + 1 ) * 2 而我們的 fft 只能做 N = 2, 3, 5 的公倍數，所以一開始的 N 要慎選！  
+
 #include <stdio.h>
 #include <stdlib.h> 
 #include <math.h>
 #include <string.h> /* memset */
 #include <unistd.h> /* close */
+#include <time.h>
 #define DEBUG 0
-//#define N 32
+
+int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_im, int N);
+
 int main()
 {
-	int i;
-	int N;
-	N = 50;
-	N = N*4;
+	int i, p, q, r, N0, N;
+		
+	N0 = 8;
+	N = N0;		
+	printf("N = %d\n",N);
+	
+	N = 4*N;
+	
 	double *y_re, *y_im, *x_re, *x_im;
 	y_re = (double *) malloc( N * sizeof(double));
 	y_im = (double *) malloc( N * sizeof(double));
 	x_re = (double *) malloc( N * sizeof(double));
 	x_im = (double *) malloc( N * sizeof(double));
-		
 	memset( x_re, 0, N*sizeof(double) );
 	memset( x_im, 0, N*sizeof(double) );
 	
-	for(i=0;i<N;++i)
-	{
-		printf("%f + %f i\n", x_re[i], x_im[i]);
-	}
-	printf("1.================================\n");
-	
-	for(i=0;i<N/4;++i)
-	{
-		x_re[2*i+1] = i;
-		x_im[i] = 0.0;
-	}
 	#if DEBUG
 	for(i=0;i<N;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
 	}
+	printf("1.================================\n");
 	#endif
 	
-	printf("2.================================\n");
+	// initial condition
+	for(i=0;i<N/4;++i)
+	{
+		x_re[2*i+1] = i;
+		x_im[i] = 0.0;
+	}
 	
+	#if DEBUG
+	for(i=0;i<N;++i)
+	{
+		printf("%f + %f i\n", x_re[i], x_im[i]);
+	}
+	printf("2.================================\n");
+	#endif
+		
 	Fast_Fourier_Transform(y_re, y_im, x_re, x_im, N);
+	
+	printf("DCT-II : \n");
 	for(i=0;i<N/4;++i)
 	{
 		printf("%f \n", y_re[i]);
+	}
+	free(y_re);
+	free(x_re);
+	free(y_im);
+	free(x_im);
+	
+printf("======================================================================\n");
+	
+	N = N0;
+	printf("N = %d\n",N);
+	N = (N+1)*2;
+	
+	y_re = (double *) malloc( N * sizeof(double));
+	y_im = (double *) malloc( N * sizeof(double));
+	x_re = (double *) malloc( N * sizeof(double));
+	x_im = (double *) malloc( N * sizeof(double));
+	memset( x_re, 0, N*sizeof(double) );
+	memset( x_im, 0, N*sizeof(double) );
+	
+	#if DEBUG
+	for(i=0;i<N;++i)
+	{
+		printf("%f + %f i\n", x_re[i], x_im[i]);
+	}
+	printf("1.================================\n");
+	#endif
+	
+	//initial condition
+	for(i=0;i<N/2-1;++i)
+	{
+		x_re[i+1] = i;
+		x_im[i] = 0.0;
+	}
+	
+	#if DEBUG
+	for(i=0;i<N;++i)
+	{
+		printf("%f + %f i\n", x_re[i], x_im[i]);
+	}
+	printf("2.================================\n");
+	#endif
+	
+	Fast_Fourier_Transform(y_re, y_im, x_re, x_im, N);
+	
+	printf("DST-I : \n");
+	for(i=1;i<N/2;++i)
+	{
+		printf("%f \n", -y_im[i]);
 	}
 	
 	free(y_re);
 	free(x_re);
 	free(y_im);
 	free(x_im);
-	return 0;
 }
 
 int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_im, int N)
@@ -72,7 +134,7 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 	}
 	else if(N>2 && (N%2)==0)
 	{
-		double *z_r, *z_i, *u_r, *u_i;			   // z 做完後，存到 u 中  
+		double *z_r, *z_i, *u_r, *u_i;			   // z °μ§1?a!A|s‥i u ??  
 		z_r = (double *) malloc(N*sizeof(double)); // z_r:0~N/2-1: even, z_r:N/2~N-1: odd
 		z_i = (double *) malloc(N*sizeof(double)); // z_i:0~N/2-1: even, z_i:N/2~N-1: odd 
 		u_r = (double *) malloc(N*sizeof(double)); // z_r:0~N/2-1: even, z_r:N/2~N-1: odd

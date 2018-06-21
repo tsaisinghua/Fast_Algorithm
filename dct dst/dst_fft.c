@@ -1,4 +1,4 @@
-//dst_by_fft
+//DST-I
 // 因為 N = ( N + 1 ) * 2 而我們的 fft 只能做 N = 2, 3, 5 的公倍數，所以一開始的 N 要慎選！  
 
 #include <stdio.h> 
@@ -8,7 +8,7 @@
 #include <string.h> /* memset */
 #include <unistd.h> /* close */
 #include <time.h>
-#define DEBUG 1
+#define DEBUG 0
 
 int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_im, int N);
 
@@ -18,9 +18,9 @@ int main()
 	double T1;
 	clock_t t1, t2;
 	
-	N = 15;
-	N = (N+1)*2;
+	N = 8;
 	printf("N = %d\n",N);
+	N = (N+1)*2;
 	
 	double *y_re, *y_im, *x_re, *x_im;
 	y_re = (double *) malloc( N * sizeof(double));
@@ -30,25 +30,28 @@ int main()
 	memset( x_re, 0, N*sizeof(double) );
 	memset( x_im, 0, N*sizeof(double) );
 	
-	for(i=0;i<N;++i)
-	{
-		printf("%f + %f i\n", x_re[i], x_im[i]);
-	}
-	printf("1.================================\n");
-	
-	for(i=0;i<N/2-1;++i)
-	{
-		x_re[i+1] = i;
-		x_im[i] = 0.0;
-	}
 	#if DEBUG
 	for(i=0;i<N;++i)
 	{
 		printf("%f + %f i\n", x_re[i], x_im[i]);
 	}
+	printf("1.================================\n");
 	#endif
 	
+	//initial condition
+	for(i=0;i<N/2-1;++i)
+	{
+		x_re[i+1] = i;
+		x_im[i] = 0.0;
+	}
+	
+	#if DEBUG
+	for(i=0;i<N;++i)
+	{
+		printf("%f + %f i\n", x_re[i], x_im[i]);
+	}
 	printf("2.================================\n");
+	#endif
 	
 	Fast_Fourier_Transform(y_re, y_im, x_re, x_im, N);
 	for(i=1;i<N/2;++i)

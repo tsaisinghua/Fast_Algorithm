@@ -51,23 +51,29 @@ int main()
 			{
 				a = w;
 				for(i=2;i<p;++i)
-				{
+				{	
+					//printf("1.a= %d, w = %d\n",a, w);
 					a = a*w % p;
+					printf("2.a= %d, w = %d, p = %d\n",a, w, p);
 					if(a == 1) break;
 				}
-				if(i==n) break;
+				//printf("i= %d, n = %d\n", i, n);
+				if(i==n) break;		 // i : W的次方, W=2,...,p-1 ; i = n =8 : w_{n=8}^{i=8}=1  
 			}
-			if(w<p)
+			//printf("1.k= %d\n",k);
+			if(w<p)					 //一執行此塊，碰到後面的break就會直接跳出最外面的for迴圈，因為break就是要為了跳出迴圈用的！ 
 			{
 				printf("Find!\n");
-				break;
+				break;				
 			}
 		}
+		//printf("2.k= %d\n",k);		// 當 k = 42 時，因為前面已break，所以這裡不會被執行！
 	}
+	printf("p=%d for n=%d, w=%d, a=%d\n",p,n,w,a);
 	a = 1;
 	for(i=0;i<n-1;++i)
 	{
-		a = a*w % p;
+		a = a*w % p;					// w^n=1 (mod p) => 找 w^{n-1}=? (mod p) => ? = 反元素！ 
 	}
 	printf("p=%d for n=%d, w=%d, a=%d\n",p,n,w,a);
 	system("pause");
