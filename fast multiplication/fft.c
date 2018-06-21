@@ -54,7 +54,7 @@ int main()
 				{	
 					//printf("1.a= %d, w = %d\n",a, w);
 					a = a*w % p;
-					printf("2.a= %d, w = %d, p = %d\n",a, w, p);
+					//printf("2.a= %d, w = %d, p = %d\n",a, w, p);
 					if(a == 1) break;
 				}
 				//printf("i= %d, n = %d\n", i, n);
@@ -140,7 +140,12 @@ int DFT(int *x, int *y, int w, int p, int n, int dir)
 		printf("inverse of n: %d\n",a);
 		for(i=0;i<n;++i)
 		{
+			printf("1.y[i] = %d\n",y[i]);
+		}
+		for(i=0;i<n;++i)
+		{
 			y[i] = y[i]*a % p; 
+			printf("2.y[i] = %d\n",y[i]);
 		}
 	}
 	return 0;
