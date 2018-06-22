@@ -17,11 +17,21 @@ int main()
 	// initial value
 	for(i=0;i<n;++i)  
 	{
+		/*
 		if(i<n/2) 
 		{
 			x[i] = rand() % 10;
 			y[i] = rand() % 10;
 		} 
+		*/
+		if(i<n/2)
+		{
+			x[0] = 2;
+			y[0] = 4;
+			x[1] = 1;
+			y[1] = 3;
+		}
+		
 		else 
 		{
 			x[i] = 0;
@@ -77,15 +87,23 @@ int main()
 	}
 	printf("p=%d for n=%d, w=%d, a=%d\n",p,n,w,a);
 	system("pause");
-	DFT(x,X,a,p,n,1);
-	 //FFT(x,X,a,p,n,1);
-	DFT(y,Y,a,p,n,1);
-	//FFT(y,Y,a,p,n,1);
-		
+	for(i=n-1;i>=0;i--)
+	{
+		printf("Before:X[%d]=%d, Y[%d]=%d\n",i,X[i],i,Y[i]);
+	}
+	//DFT(x,X,a,p,n,1);
+	 FFT(x,X,a,p,n,1);
+	//DFT(y,Y,a,p,n,1);
+	 FFT(y,Y,a,p,n,1);
+	for(i=n-1;i>=0;i--)
+	{
+		printf("After:X[%d]=%d, Y[%d]=%d\n",i,X[i],i,Y[i]);
+	}
 	for(i=0;i<n;++i)
 	{
 		Z[i] = X[i]*Y[i] % p;
 	}
+
 	DFT(Z,z,w,p,n,-1);
 	for(i=n-1;i>=0;i--)
 	{
@@ -153,43 +171,37 @@ int FFT(int *x, int *y, int w, int p, int n, int dir)
 {
 	int i, j, s, a, b;
 	a = 1;
+	
 	if(n==2)
 	{
 		y[0] = (x[0] + x[1]) % p;
 		y[1] = (x[0] + w*x[1]) % p;
-	}
-	
-	/*else if(n>2 && (n%2)==0)
+	}	
+	else if(n>2 && (n%2)==0)
 	{
 		int *z, *u;
-		int w, w_n;
-		z = (int *) malloc(n*sizeof(int));
-		u = (int *) malloc(n*sizeof(int));
+		int w, k, t;
+		z = (int *) malloc(n*sizeof(int));	// before
+		u = (int *) malloc(n*sizeof(int));	// after
 		for(k=0;k<n/2;++k)
 		{
-			z[k] = x[2*k];
-			z[N/2+k]  = x[2*k+1];
+			z[k] = x[2*k];			// x_even
+			z[n/2+k] = x[2*k+1];	// x_odd
 		}
-		FFT(z, u, w, p, n/2, dir);
-		FFT(z+N/2, u+N/2, w, p, dir);
-		theta1 = 2.0*M_PI/N;
-		w_n =  cos(theta1);
-		w   = 1;
-		
-		for(k=0;k<N/2;++k)
+		FFT(z, u, w^2, p, n/2, dir);
+		FFT(z+n/2, u+n/2, w^2, p, n/2, dir);
+		t = 1;
+		for (j=0; j<n/2; ++j) 
 		{
-			a = w_re*u_r[N/2+k] - w_im*u_i[N/2+k];
-			b = w_re*u_i[N/2+k] + w_im*u_r[N/2+k];
-			y_re[k]     = u_r[k] + a;
-			y_im[k]     = u_i[k] + b;
-			y_re[N/2+k] = u_r[k] - a;
-			y_im[N/2+k] = u_i[k] - b;
-			temp = w_re;
-			w_re = w_re*w_N_re - w_im*w_N_im;
-			w_im = temp*w_N_im + w_im*w_N_re;
-		}
-		free(u_r); free(u_i); free(z_r); free(z_i);
-	}	
+      		y[j] = (u[j] + t * u[n/2+j]) ;//%p;
+      		y[n/2+j] = (u[j] - t * u[n/2+j]);// %p ;
+      		t = (t * w) ;//%p;
+  		}
+  		free(u);
+		free(z);
+		//return y;
+	}
+	/*
 	else if(n==3)
 	{
 		y[0] = (x[0] + x[1] + x[2]) % p;
