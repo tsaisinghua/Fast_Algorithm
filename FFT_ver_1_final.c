@@ -86,8 +86,8 @@ int Fast_Fourier_Transform(double *y_re, double *y_im, double *x_re, double *x_i
 		double *z_r, *z_i, *u_r, *u_i;			   // z 做完後，存到 u 中  
 		z_r = (double *) malloc(N*sizeof(double)); // z_r:0~N/2-1: even, z_r:N/2~N-1: odd
 		z_i = (double *) malloc(N*sizeof(double)); // z_i:0~N/2-1: even, z_i:N/2~N-1: odd 
-		u_r = (double *) malloc(N*sizeof(double)); // z_r:0~N/2-1: even, z_r:N/2~N-1: odd
-		u_i = (double *) malloc(N*sizeof(double)); // z_i:0~N/2-1: even, z_i:N/2~N-1: odd 
+		u_r = (double *) malloc(N*sizeof(double)); // u_r:0~N/2-1: even, u_r:N/2~N-1: odd
+		u_i = (double *) malloc(N*sizeof(double)); // u_i:0~N/2-1: even, u_i:N/2~N-1: odd 
 		
 		for(k=0;k<N/2;++k)
 		{

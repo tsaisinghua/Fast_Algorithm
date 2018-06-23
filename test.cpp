@@ -5,18 +5,14 @@ int main(void)
 {
  	int a = 40000;
  	int b = 60000;
-	int i;
  	int c;
- 	int p=50000;
- 	c=a*b %p;
+ 	c=a*b %50000;
+ 	printf("c=%d", c);
  	
- 	printf("c=%d\n", c);
- 	
- 	for(i=0;i<=b;++i)
+ 	for(int i;i<=b;++i)
  	{
- 		a=(a+a) %p;	
+ 		123;	
 	}
-	printf("c=%d", c);
 	return 0;	
 }
 
