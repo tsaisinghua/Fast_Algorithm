@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-#define DEBUG 1
+#define DEBUG 0
 int Modtest(int a, int b, int p);
 int FFT(int *x, int *y, int w, int p, int n, int dir);
 int iFFT(int *x, int *y, int w, int p, int n, int dir);
@@ -11,7 +11,7 @@ int main()
 	int i, j, k, a, b, m, n, p, w, Iter_Max = pow(2,30);
 	int *x, *X, *y, *Y, *z, *Z;
 	srand(time(NULL));
-	n = 16;
+	n = 50;
 	x = (int *) malloc(n*sizeof(int));
 	X = (int *) malloc(n*sizeof(int));
 	y = (int *) malloc(n*sizeof(int));
@@ -25,19 +25,22 @@ int main()
 		
 		if(i<n/2) 
 		{
-		/*	
+	
 			x[i] = rand() % 10;
 			y[i] = rand() % 10;
-		*/	
-			
-			x[0] = 4;
-			x[1] = 3;
-			x[2] = 2;
-			x[3] = 1;
-			y[0] = 8;
-			y[1] = 7;
-			y[2] = 6;
-			y[3] = 5;
+		
+		/*		
+			x[0] = 5;
+			x[1] = 4;
+			x[2] = 3;
+			x[3] = 2;
+			x[4] = 1;
+			y[0] = 0;
+			y[1] = 9;
+			y[2] = 8;
+			y[3] = 7;
+			y[4] = 6;
+		*/
 		} 
 		else 
 		{
@@ -69,22 +72,33 @@ int main()
 				a = w;
 				for(i=2;i<p;++i)
 				{	
-					//printf("1.a= %d, w = %d\n",a, w);
+					#if DEBUG
+					printf("1.a= %d, w = %d\n",a, w);
+					#endif
 					a = Modtest(a, w, p);
-					//printf("2.a= %d, w = %d, p = %d\n",a, w, p);
+					
+					#if DEBUG					
+					printf("2.a= %d, w = %d, p = %d\n",a, w, p);
+					#endif
 					if(a == 1) break;
 				}
-				//printf("i= %d, n = %d\n", i, n);
+				#if DEBUG
+				printf("i= %d, n = %d\n", i, n);
+				#endif
 				if(i==n) break;		 // i : W的次方, W=2,...,p-1 ; i = n =8 : w_{n=8}^{i=8}=1  
 			}
-			//printf("1.k= %d\n",k);
+			#if DEBUG
+			printf("1.k= %d\n",k);
+			#endif
 			if(w<p)					 //一執行此塊，碰到後面的break就會直接跳出最外面的for迴圈，因為break就是要為了跳出迴圈用的！ 
 			{
 				printf("Find!\n");
 				break;				
 			}
 		}
-		//printf("2.k= %d\n",k);		// 當 k = 42 時，因為前面已break，所以這裡不會被執行！
+		#if DEBUG
+		printf("2.k= %d\n",k);		// 當 k = 42 時，因為前面已break，所以這裡不會被執行！
+		#endif
 	}
 	printf("p=%d for n=%d, w=%d, a=%d\n",p,n,w,a);
 	a = 1;
@@ -122,12 +136,14 @@ int main()
 	{
 		Z[i] =Modtest(X[i], Y[i], p);
 	}
+	#if DEBUG
 	for(i=n-1;i>=0;i--)
 	{
 		printf("After:Z[%d]=%d\n",i,Z[i]);
 	}
+	#endif
 	// DFT(Z,z,w,p,n,-1);
-	iFFT(Z,z,w,p,n,-1);
+	FFT(Z,z,w,p,n,-1);
 	for(i=n-1;i>=0;i--)
 	{
 		printf("%d ",z[i]);
@@ -155,7 +171,7 @@ int is_prime(int p)		// 若 P 為質數，則回傳 1，這樣 main 中的 for 才會執行！
 	}
 	return 1;
 }
-/*
+
 int DFT(int *x, int *y, int w, int p, int n, int dir)
 {
 	int i, j, s, a, b;
@@ -192,15 +208,16 @@ int DFT(int *x, int *y, int w, int p, int n, int dir)
 	}
 	return 0;
 }
-*/
+
 int FFT(int *x, int *y, int w, int p, int n, int dir)
 {
-	int i, j, a, b;
+	int i, j, a, b, c, d, e, f;
+	int  m2, m3, m4, m5;
 	
 	if(n==2)
 	{	
-		y[0] = (x[0] + x[1]) %p;
-		y[1] = x[0]%p + Modtest(w, x[1], p);
+		y[0] = (x[0] + x[1]) % p;
+		y[1] = (x[0]%p + Modtest(w, x[1], p))%p;
 	}	
 	else if(n>2 && (n%2)==0)
 	{
@@ -215,8 +232,7 @@ int FFT(int *x, int *y, int w, int p, int n, int dir)
 		}
 		FFT(z, u, Modtest(w, w, p), p, n/2, 1);
 		FFT(z+n/2, u+n/2, Modtest(w, w, p), p, n/2, 1);
-		t = 1;
-		
+		t = 1;		
 		for (j=0; j<n/2; ++j)
 		{
       		y[j] = (u[j] + t * u[n/2+j]) % p;
@@ -235,61 +251,162 @@ int FFT(int *x, int *y, int w, int p, int n, int dir)
 		free(z);
 		//return y;
 	}
-	else printf("we didn't do this!\n");
-	/*
 	else if(n==3)
 	{
 		y[0] = (x[0] + x[1] + x[2]) % p;
-		y[1] = (x[0] + w*x[1] + w*w*x[2]) % p;
-		y[2] = (x[0] + w*w*x[1] + w*x[2]) % p;
+		y[1] = x[0]%p + Modtest(w, x[1], p) + Modtest(w*w, x[2], p);
+		y[2] = x[0]%p + Modtest(w*w, x[1], p) + Modtest(w, x[2], p);
 	}
-	*/
-	return 0;
-}
-
-int iFFT(int *x, int *y, int w, int p, int n, int dir)
-{
-	int i, j, a, b;	
-	if(n==2)
-	{	
-		y[0] = (x[0] + x[1]) %p;
-		y[1] = (x[0] +w*x[1]) %p;
-	}	
-	else if(n>2 && (n%2)==0)
+	else if(n>3 && (n%3)==0)
 	{
 		int *z, *u;
 		int k, t;
 		z = (int *) malloc(n*sizeof(int));	// before
 		u = (int *) malloc(n*sizeof(int));	// after
-		for(k=0;k<n/2;++k)
-		{
-			z[k] = x[2*k];			// x_even
-			z[n/2+k] = x[2*k+1];	// x_odd
-		}
-		iFFT(z, u, Modtest(w, w, p), p, n/2, 1);
-		iFFT(z+n/2, u+n/2, Modtest(w, w, p), p, n/2, 1);
-		t = 1;
 		
-		for(j=0; j<n/2; ++j)
+		for(k=0;k<n/3;++k)
 		{
-      		y[j] = u[j]% p + Modtest(t, u[n/2+j], p);
-      		y[n/2+j] = u[j]% p - Modtest(t, u[n/2+j], p);
-      		if(y[j]<0)
+			z[k] = x[3*k];
+			z[n/3+k]  = x[3*k+1];
+			z[2*n/3+k]  = x[3*k+2];
+		}
+		m3=Modtest(Modtest(w, w, p), w, p);
+		FFT(z, u, m3, p, n/3, 1);
+		FFT(z+n/3, u+n/3, m3, p, n/3, 1);
+		FFT(z+2*n/3, u+2*n/3, m3, p, n/3, 1);
+		
+		c=1;
+		for(i=0;i<n/3;++i)
+		{
+			c=Modtest(c, w, p);
+		}
+		d=1;
+		for(i=0;i<2*n/3;++i)
+		{
+			d=Modtest(d, w, p);
+		}
+		t = 1;
+		for(j=0;j<n/3;++j)
+		{
+			
+      		y[j] = u[j] %p + Modtest(t, u[n/3+j], p) + Modtest(Modtest(t, t, p), u[2*n/3+j], p);
+			y[n/3+j] = u[j] %p + Modtest(Modtest(t, u[n/3+j], p),c,p) + Modtest(Modtest(Modtest(t, t, p), u[2*n/3+j], p),d,p);
+      		y[2*n/3+j] = u[j] %p + Modtest(Modtest(t, u[n/3+j], p),d,p) + Modtest(Modtest(Modtest(t, t, p), u[2*n/3+j], p),c,p);
+      		
+			if(y[j]<0)
       		{
       			y[j] += p;
 			}
-			if(y[n/2+j]<0)
+			if(y[n/3+j]<0)
       		{
-      			y[n/2+j] += p;
+      			y[n/3+j] += p;
+			}
+			if(y[2*n/3+j]<0)
+      		{
+      			y[2*n/3+j] += p;
 			}
       		t = Modtest(t, w, p);
 		}
-  		free(u);
-		free(z);
-		//return y;
+		free(u); free(z);
+	}
+	else if(n==5)
+	{
+		/*
+		y[0] = (x[0] + x[1] + x[2] + x[3] + x[4]) % p;
+		y[1] = (x[0]% p + Modtest(w, x[1], p) + Modtest(w*w, x[2], p) + Modtest(w*w*w, x[3], p) + Modtest(w*w*w*w, x[4], p))%p;
+		y[2] = (x[0]% p + Modtest(w*w, x[1], p) + Modtest(w*w*w*w, x[2], p) + Modtest(w, x[3], p) + Modtest(w*w*w, x[4], p))%p;
+		y[3] = (x[0]% p + Modtest(w*w*w, x[1], p) + Modtest(w, x[2], p) + Modtest(w*w*w*w, x[3], p) + Modtest(w*w, x[4], p))%p;
+		y[4] = (x[0]% p + Modtest(w*w*w*w, x[1], p) + Modtest(w*w*w, x[2], p) + Modtest(w*w, x[3], p) + Modtest(w, x[4], p))%p;
+		*/
+		m2 = Modtest(w, w, p);
+		m3 = Modtest(m2, w, p);
+		m4 = Modtest(m3, w, p);
+		y[0] = (x[0]+x[1]+x[2]+x[3]+x[4]) % p;
+		y[1] = (x[0]%p + Modtest(w, x[1], p) + Modtest(m2, x[2], p) + Modtest(m3, x[3], p) + Modtest(m4, x[4], p))%p;
+		y[2] = (x[0]%p + Modtest(m2, x[1], p) + Modtest(m4, x[2], p) + Modtest(w, x[3], p) + Modtest(m3, x[4], p))%p;
+		y[3] = (x[0]%p + Modtest(m3, x[1], p) + Modtest(w, x[2], p) + Modtest(m4, x[3], p) + Modtest(m2, x[4], p))%p;	
+		y[4] = (x[0]%p + Modtest(m4, x[1], p) + Modtest(m3, x[2], p) + Modtest(m2, x[3], p) + Modtest(w, x[4], p))%p;	
+		//Modtest(Modtest(Modtest(Modtest(w, w, p), w, p), w, p), w, p)
+	}
+	else if(n>5 && (n%5)==0)
+	{
+		int *z, *u;
+		int k, t;
+		z = (int *) malloc(n*sizeof(int));	// before
+		u = (int *) malloc(n*sizeof(int));	// after
+		
+		for(k=0;k<n/5;++k)
+		{
+			z[k] = x[5*k];
+			z[n/5+k]  = x[5*k+1];
+			z[2*n/5+k]  = x[5*k+2];
+			z[3*n/5+k]  = x[5*k+3];
+			z[4*n/5+k]  = x[5*k+4];
+		}
+		m5 = Modtest(Modtest(Modtest(Modtest(w, w, p), w, p), w, p), w, p);
+		FFT(z, u, m5, p, n/5, 1);
+		FFT(z+n/5, u+n/5, m5, p, n/5, 1);
+		FFT(z+2*n/5, u+2*n/5, m5, p, n/5, 1);
+		FFT(z+3*n/5, u+3*n/5, m5, p, n/5, 1);
+		FFT(z+4*n/5, u+4*n/5, m5, p, n/5, 1);
+		
+		c=1;
+		for(i=0;i<n/5;++i)
+		{
+			c=Modtest(c, w, p);
+		}
+		d=1;
+		for(i=0;i<2*n/5;++i)
+		{
+			d=Modtest(d, w, p);
+		}
+		e=1;
+		for(i=0;i<3*n/5;++i)
+		{
+			e=Modtest(e, w, p);
+		}
+		f=1;
+		for(i=0;i<4*n/5;++i)
+		{
+			f=Modtest(f, w, p);
+		}
+		t = 1;
+		for(j=0;j<n/3;++j)
+		{
+			int t2, t3, t4;
+			t2 = Modtest(t, t, p);
+			t3 = Modtest(t2, t, p);
+			t4 = Modtest(t3, t, p);
+      		y[j] = (u[j] %p + Modtest(t, u[n/5+j], p) + Modtest(t2, u[2*n/5+j], p) + Modtest(t3, u[3*n/5+j], p) +Modtest(t4, u[4*n/5+j], p))%p;
+			y[n/5+j] = (u[j] %p + Modtest(Modtest(t, u[n/5+j], p),c,p) + Modtest(Modtest(t2, u[2*n/5+j], p),d,p) + Modtest(Modtest(t3, u[3*n/5+j], p),e,p) + Modtest(Modtest(t4, u[4*n/5+j], p),f,p))%p;
+      		y[2*n/5+j] = (u[j] %p + Modtest(Modtest(t, u[n/5+j], p),d,p) + Modtest(Modtest(t2, u[2*n/5+j], p),f,p) + Modtest(Modtest(t3, u[3*n/5+j], p),c,p) + Modtest(Modtest(t4, u[4*n/5+j], p),e,p))%p;
+      		y[3*n/5+j] = (u[j] %p + Modtest(Modtest(t, u[n/5+j], p),e,p) + Modtest(Modtest(t2, u[2*n/5+j], p),c,p) + Modtest(Modtest(t3, u[3*n/5+j], p),f,p) + Modtest(Modtest(t4, u[4*n/5+j], p),d,p))%p;
+      		y[4*n/5+j] = (u[j] %p + Modtest(Modtest(t, u[n/5+j], p),f,p) + Modtest(Modtest(t2, u[2*n/5+j], p),e,p) + Modtest(Modtest(t3, u[3*n/5+j], p),d,p) + Modtest(Modtest(t4, u[4*n/5+j], p),c,p))%p;
+			if(y[j]<0)
+      		{
+      			y[j] += p;
+			}
+			if(y[n/5+j]<0)
+      		{
+      			y[n/5+j] += p;
+			}
+			if(y[2*n/5+j]<0)
+      		{
+      			y[2*n/5+j] += p;
+			}
+			if(y[3*n/5+j]<0)
+      		{
+      			y[3*n/5+j] += p;
+			}
+			if(y[4*n/5+j]<0)
+      		{
+      			y[4*n/5+j] += p;
+			}
+      		t = Modtest(t, w, p);
+		}
+		free(u); free(z);
 	}
 	else printf("we didn't do this!\n");
-	
 	if(dir==-1)
 	{
 		a = n;		
@@ -305,8 +422,17 @@ int iFFT(int *x, int *y, int w, int p, int n, int dir)
 			y[i] = Modtest(y[i], a, p);
 		}
 	}
+	/*
+	else if(n==3)
+	{
+		y[0] = (x[0] + x[1] + x[2]) % p;
+		y[1] = (x[0] + w*x[1] + w*w*x[2]) % p;
+		y[2] = (x[0] + w*w*x[1] + w*x[2]) % p;
+	}
+	*/
 	return 0;
 }
+
 int Modtest(int a, int b, int p)
 {
 	// result = (a*b) % p
